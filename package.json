@@ -1,0 +1,48 @@
+{
+    "private": true,
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build"
+    },
+    "devDependencies": {
+        "@headlessui/react": "^1.4.2",
+        "@inertiajs/inertia": "^0.11.0",
+        "@inertiajs/inertia-react": "^0.8.1",
+        "@inertiajs/progress": "^0.2.6",
+        "@tailwindcss/forms": "^0.5.3",
+        "@vitejs/plugin-react": "^3.0.0",
+        "autoprefixer": "^10.4.12",
+        "axios": "^1.1.2",
+        "laravel-vite-plugin": "^0.7.2",
+        "lodash": "^4.17.19",
+        "postcss": "^8.4.18",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "tailwindcss": "^3.2.1",
+        "vite": "^4.0.0"
+    },
+    "dependencies": {
+        "@date-io/date-fns-jalali": "^2.16.0",
+        "@emotion/cache": "^11.10.5",
+        "@emotion/react": "^11.10.5",
+        "@emotion/styled": "^11.10.5",
+        "@mui/icons-material": "^5.11.0",
+        "@mui/material": "^5.11.0",
+        "@mui/x-data-grid": "^5.17.16",
+        "@mui/x-date-pickers": "^5.0.20",
+        "@persian-tools/persian-tools": "^3.4.1",
+        "add": "^2.0.6",
+        "date-fns-jalali": "^2.13.0-0",
+        "i": "^0.3.7",
+        "i18next": "^22.4.6",
+        "js-export-excel": "^1.1.4",
+        "notistack": "^2.0.8",
+        "npm": "^9.8.1",
+        "react-i18next": "^12.1.1",
+        "react-multi-date-picker": "^4.1.2",
+        "stylis": "^4.1.3",
+        "stylis-plugin-rtl": "^2.1.1",
+        "wordifyfa": "^1.4.1",
+        "yarn": "^1.22.19"
+    }
+}
