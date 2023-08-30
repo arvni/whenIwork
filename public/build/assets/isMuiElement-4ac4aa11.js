@@ -1,0 +1,1 @@
+import{r as u}from"./app-d1dbfdab.js";function c(e,t=166){let i;function o(...r){const n=()=>{e.apply(this,r)};clearTimeout(i),i=setTimeout(n,t)}return o.clear=()=>{clearTimeout(i)},o}function m(e,t){return u.isValidElement(e)&&t.indexOf(e.type.muiName)!==-1}export{c as d,m as i};
