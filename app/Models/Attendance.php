@@ -9,14 +9,9 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    public function attendable()
+    public function User()
     {
-        return $this->morphTo();
-    }
-
-    public function attendableRole()
-    {
-        return $this->belongsTo(Role::class,"attendable_id");
+        return $this->belongsTo(User::class);
     }
 
     public function Shift()

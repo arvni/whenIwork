@@ -29,4 +29,19 @@ class ClientRequest extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function scopeStatus($query, $status)
+    {
+        return $query->where("status", $status);
+    }
+
+    public function scopeAccepted($query)
+    {
+        return $query->status("accepted");
+    }
+
+    public function scopeWaiting($query)
+    {
+        return $query->status("waiting");
+    }
 }

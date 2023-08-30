@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
 {
@@ -29,18 +28,15 @@ class Room extends Model
         return $this->hasManyThrough(Work::class, Shift::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function Department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
     }
 
-    public function Managers()
+
+    public function scopeSearch($query, $search)
     {
-        $departmentId = $this->attributes['department_id']??"";
-        return User::permission("admin.Department.$departmentId.Room.$this->id")->select(["name", "id"]);
+        return $query->where("name", "like", "%$search%");
     }
 
 }

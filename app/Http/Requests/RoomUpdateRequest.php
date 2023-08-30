@@ -26,8 +26,6 @@ class RoomUpdateRequest extends FormRequest
         return [
             "name" => "required|unique:rooms,name,".($this->route()->parameters()["room"])->id,
             "department.id" => "required|exists:departments,id",
-            "managers" => "required|array",
-            "managers.*.id" => "required|exists:users,id"
         ];
     }
 }

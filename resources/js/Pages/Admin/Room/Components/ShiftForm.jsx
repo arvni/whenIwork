@@ -33,16 +33,7 @@ const Form = ({values, setValues, cancel, submit, errors, open, loading, title, 
             setError("ended_at", "زمان پایان شیفت باید بزرگتر از شروع باشد");
             output = false
         }
-        if (values.type === "open") {
-            if (values.related.length < 1) {
-                setError("related", "لطفا حداقل یک نقش را انتخاب کنید");
-                output = false;
-            }
-            if (!values.related.map(item => item.class.split("\\").pop() === "Role").reduce((a, b) => a && b, true)) {
-                setError("related", "نقش انتخاب شده صحیح نیست");
-                output = false;
-            }
-        } else {
+        if (values.type !== "open") {
             if (values.related === "" || !values?.related?.id) {
                 setError("related", "لطفا یک کاربر را انتخاب کنید");
             }
@@ -100,17 +91,16 @@ const Form = ({values, setValues, cancel, submit, errors, open, loading, title, 
                         <TextField name={"noUsers"} fullWidth onChange={handleChange} value={values.noUsers}
                                    label={"تعداد کاربران"} type={"number"} error={errors.hasOwnProperty("noUsers")}
                                    helperText={errors?.noUsers} inputProps={{min: 1}}/>
-                    </Grid> : null}
+                    </Grid> :
                     <Grid item xs={12}>
                         <SelectSearch value={values?.related}
                                       name={"related"}
                                       onChange={handleChange}
-                                      multiple={values.type === "open"}
-                                      url={route(`admin.${values.type === "open" ? "roleApi" : "userApi"}.index`)}
-                                      label={values.type === "open" ? "نقش ها" : "کابر"}
+                                      url={route(`admin.userApi.index`)}
+                                      label={"کابر"}
                                       helperText={errors?.related ?? ""}
                                       error={Object.keys(errors).includes('related')}/>
-                    </Grid>
+                    </Grid>}
                     <Grid item xs={12}>
                         <TextField name={"description"} fullWidth onChange={handleChange} value={values.description}
                                    label={"توضیحات"} multiline rows={3} error={errors.hasOwnProperty("description")}

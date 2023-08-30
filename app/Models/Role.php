@@ -2,21 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Permission\Models\Role as SpatieRole;
 
 class Role extends SpatieRole
 {
-    use HasFactory;
 
     public function Attendances()
     {
-        return $this->morphMany(Attendance::class,"attendable");
+        return $this->morphMany(Attendance::class, "attendable");
     }
 
     public function RevisableClientRequests()
     {
-        return $this->morphMany(ClientRequest::class,"revisable_by");
+        return $this->morphMany(ClientRequest::class, "revisable_by");
+    }
+
+    public function permissions(): BelongsToMany
+    {
+        return parent::permissions();
     }
 }

@@ -2,19 +2,17 @@ import {useState} from "react";
 import {Head, useForm} from "@inertiajs/inertia-react";
 import {GridActionsCellItem} from "@mui/x-data-grid";
 import {Password, Delete as DeleteIcon, Edit as EditIcon} from "@mui/icons-material";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import TableLayout from "@/Layouts/TableLayout";
 import DeleteForm from "@/Components/DeleteForm";
 import ChangePassword from "./Components/ChangePassword";
 import Filter from "./Components/Filter";
-import {useInertiaVisit} from "@/Services/Inertia";
 import {Inertia} from "@inertiajs/inertia";
+import AdminLayout from "@/Layouts/AdminLayout";
 
-const Index = ({users, status, defaultValues}) => {
+const Index = ({users, status, defaultValues, success}) => {
     const {setData, data, post, processing, reset, setError, errors} = useForm();
     const [open, setOpen] = useState(false);
     const [openChangePassword, setOpenChangePassword] = useState(false);
-    const [success, setSuccess] = useState(null);
     const columns = [
         {field: 'userId', headerName: 'شناسه', type: "string", width: 70},
         {field: 'name', headerName: 'نام', type: "string", width: 150},
@@ -34,11 +32,12 @@ const Index = ({users, status, defaultValues}) => {
             width: 100,
             sortable: false,
             renderCell: (params) => ([
-                <GridActionsCellItem icon={<EditIcon color={"warning"}/>} label="بروزرسانی"
+                <GridActionsCellItem key={"edit-" + params.value} icon={<EditIcon color={"warning"}/>} label="بروزرسانی"
                                      onClick={edit(params.row.id)}/>,
-                <GridActionsCellItem icon={<Password/>} label="تغییر رمز عبور" onClick={editPassword(params.row.id)}
+                <GridActionsCellItem key={"change-password-" + params.value} icon={<Password/>} label="تغییر رمز عبور"
+                                     onClick={editPassword(params.row.id)}
                 />,
-                <GridActionsCellItem icon={<DeleteIcon color={"error"}/>} label="حذف"
+                <GridActionsCellItem key={"delete-" + params.value} icon={<DeleteIcon color={"error"}/>} label="حذف"
                                      onClick={destroy(params.row)}/>
             ])
         }
@@ -53,6 +52,7 @@ const Index = ({users, status, defaultValues}) => {
         setOpen(true);
     };
     const cancelDelete = () => {
+        reset();
         setOpen(false);
         setUser(null);
     }
@@ -77,22 +77,18 @@ const Index = ({users, status, defaultValues}) => {
     }
     const closeChangePassword = () => {
         setOpenChangePassword(false);
+        reset();
     }
 
     const successCb = () => {
-        setSuccess(true);
         setOpenChangePassword(false);
         cancelDelete();
-        setTimeout(() => {
-            setSuccess(null);
-            reset();
-        }, 2000);
     }
-    const pageReload = (page, filter, sort, pageSize) =>
+    const pageReload = (page, filters, sort, pageSize) =>
         Inertia.visit(route('admin.users.index'), {
             only: ["users", "defaultValues"],
             data: {
-                filterModel: filter,
+                filters,
                 page,
                 sort,
                 pageSize
@@ -135,6 +131,6 @@ const breadCrumbs = [
     }
 ]
 
-Index.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
+Index.layout = page => <AdminLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
 
 export default Index;

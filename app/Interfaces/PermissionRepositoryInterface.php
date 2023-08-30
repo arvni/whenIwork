@@ -12,6 +12,8 @@ interface PermissionRepositoryInterface
 
     public function create(array $permissionData);
 
+    public function findOrCreateByName(string $name);
+
     public function show(Permission $permission);
 
     public function edit(Permission $permission, $permissionNewData);

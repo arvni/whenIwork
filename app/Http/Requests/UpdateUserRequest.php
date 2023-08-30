@@ -33,7 +33,7 @@ class UpdateUserRequest extends FormRequest
                 "unique:users,email," . $this->route()->parameter("user")->id
             ],
             'avatar' => "image|max:2048|nullable",
-            'role.id' => 'required|exists:roles,id'
+            'roles.*.id' => 'required|exists:roles,id'
         ];
     }
 }

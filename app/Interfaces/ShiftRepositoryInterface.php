@@ -4,13 +4,14 @@
 namespace App\Interfaces;
 
 
+use App\Models\ClientRequest;
 use App\Models\Shift;
 
-interface ShiftRepositoryInterface
+interface ShiftRepositoryInterface extends RepositoryInterface
 {
     public function list(array $queryData);
 
-    public function clientList(array $queryData);
+    public function listAllowed(array $queryData);
 
     public function create(array $shiftData);
 
@@ -23,4 +24,8 @@ interface ShiftRepositoryInterface
     public function requestsList(Shift $shift,array $queryData);
 
     public function findById($id);
+
+    public function changeUser(Shift $shift, ClientRequest $clientRequest);
+
+    public function acceptOpenShift(Shift $shift,ClientRequest $clientRequest);
 }

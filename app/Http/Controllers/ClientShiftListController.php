@@ -26,13 +26,11 @@ class ClientShiftListController extends Controller
     public function __invoke(Request $request)
     {
         $request->merge(["filters" => [
-            ...$request->get("filters",[]),
+            ...$request->get("filters", []),
             "type" => optional($request->get("filters"))["type"] ?? "open"
         ]]);
-        $shifts = $this->shiftRepository->clientList($request->all());
-        $defaultValues = [...$request->except(["filters", "orderBy"]),
-            "filterModel" => [...$request->get("filters")],
-            "sort" => $request->get("orderBy")];
+        $defaultValues = $request->all();
+        $shifts = $this->shiftRepository->listAllowed($defaultValues);
         return Inertia::render("Shift/Index", compact("shifts", "defaultValues"));
     }
 }

@@ -32,7 +32,7 @@ const SelectSearch = forwardRef(({
     }
 
     const handleChange = (e, v) => {
-        onChange({...e, target: {...e.target, name, value: v ?? ""}}, v ?? "");
+        onChange({target: {name, value: v ?? ""}}, v ?? "");
     };
 
     return <Autocomplete name={name} isOptionEqualToValue={(option, value) => option.id === value?.id}

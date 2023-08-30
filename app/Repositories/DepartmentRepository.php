@@ -20,7 +20,7 @@ class DepartmentRepository implements DepartmentRepositoryInterface
     {
         $query = $this->department->withCount("Rooms");
         $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["orderBy"]);
+        $this->applyOrderBy($query, $queryData["sort"]);
         return $this->applyPaginate($query, $queryData["pageSize"]);
     }
 
@@ -28,7 +28,7 @@ class DepartmentRepository implements DepartmentRepositoryInterface
     {
         $query = $this->department->select(["id", "name"]);
         $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["orderBy"]);
+        $this->applyOrderBy($query, $queryData["sort"]);
         return $this->applyPaginate($query, $queryData["pageSize"]);
     }
 
@@ -50,7 +50,7 @@ class DepartmentRepository implements DepartmentRepositoryInterface
     {
         $query = $department->Rooms();
         $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["orderBy"]);
+        $this->applyOrderBy($query, $queryData["sort"]);
         return $this->applyPaginate($query, $queryData["pageSize"]);
     }
 

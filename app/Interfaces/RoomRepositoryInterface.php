@@ -5,10 +5,11 @@ namespace App\Interfaces;
 
 
 use App\Models\Room;
-use App\Repositories\BaseClass;
 
 interface RoomRepositoryInterface {
-    public function list(array $queryData, string $type = "admin");
+    public function list(array $queryData);
+
+    public function listAllowed(array $queryData);
 
     public function create(array $roomData);
 

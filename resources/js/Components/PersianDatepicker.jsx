@@ -14,7 +14,8 @@ const PersianDateTimePicker = ({
                                    inputFormat = "yyyy/MM/dd",
                                    required = false,
                                    fullWidth = false,
-                                   sx = null
+                                   sx = null,
+                                   ...rest
                                }) => {
     return <LocalizationProvider required dateAdapter={AdapterJalali}>
         <DesktopDatePicker
@@ -28,7 +29,7 @@ const PersianDateTimePicker = ({
             sx={sx}
             renderInput={(params) => <TextField {...params} fullWidth={fullWidth} required={required}
                                                 error={error}
-                                                helperText={helperText}/>}
+                                                helperText={helperText} {...rest}/>}
         />
     </LocalizationProvider>
 }

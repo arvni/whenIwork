@@ -1,14 +1,14 @@
-import {useEffect, useState} from "react";
+import { useState} from "react";
 import {Head, useForm} from "@inertiajs/inertia-react";
 import {GridActionsCellItem} from "@mui/x-data-grid";
-import q2o from "@/Services/querystringToObject";
 import {Delete as DeleteIcon, Edit as EditIcon, RemoveRedEye} from "@mui/icons-material";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import TableLayout from "@/Layouts/TableLayout";
 import DeleteForm from "@/Components/DeleteForm";
 import Filter from "./Components/Filter";
-import {pageReload} from "@/Services/Inertia";
+
 import AddForm from "@/Pages/Admin/Room/Components/Form";
+import {Inertia} from "@inertiajs/inertia";
+import AdminLayout from "@/Layouts/AdminLayout";
 
 const breadCrumbs = [
     {
@@ -18,26 +18,22 @@ const breadCrumbs = [
     }
 ]
 
-const Index = ({rooms, status}) => {
-    const {data,setData, post, processing, reset, errors, wasSuccessful, get} = useForm({
+const Index = ({rooms, status, success, defaultValues}) => {
+    const {data, setData, post, processing, reset, errors, get} = useForm({
         name: "",
         department: null,
         managers: []
     });
-    const [loading, setLoading] = useState(false);
     const [openDestroy, setOpenDestroy] = useState(false);
     const [openAddForm, setOpenAddForm] = useState(false);
-    const [success, setSuccess] = useState(null);
 
     const columns = [
         {field: 'name', headerName: 'نام', type: "string", width: 250},
         {
-            field: 'department',
+            field: 'department_name',
             headerName: 'دپارتمان',
             type: "string",
-            sortable: false,
             width: 150,
-            renderCell: (params) => params.row.department.name
         },
         {
             field: 'id',
@@ -45,68 +41,45 @@ const Index = ({rooms, status}) => {
             type: 'actions',
             width: 100,
             sortable: false,
-            renderCell: (params) => ([
-                <GridActionsCellItem icon={<RemoveRedEye color={"info"}/>} label="نمایش"
-                                     onClick={show(params.row.id)}/>,
-                <GridActionsCellItem icon={<EditIcon color={"warning"}/>} label="بروزرسانی"
-                                     onClick={edit(params.row.id)}/>,
-                <GridActionsCellItem icon={<DeleteIcon color={"error"}/>} label="حذف" onClick={destroy(params.row)}/>
+            renderCell: ({value, row}) => ([
+                <GridActionsCellItem key={`show-${value}`} icon={<RemoveRedEye color={"info"}/>} label="نمایش"
+                                     onClick={show(value)}/>
             ])
         }
     ];
 
-    const [defaultValues, setDefaultValues] = useState({
-        sort: {field: 'id', sort: "asc"},
-        filterModel: {search: "", department: null},
-        page: 0,
-        pageSize: 10
-    });
 
-    useEffect(() => {
-        reset();
-        const model = q2o();
-        setDefaultValues(prevState => ({...prevState, ...model}));
-    }, []);
-    useEffect(() => {
-        if (wasSuccessful) {
-            successCb();
-            reset();
-            cancelDelete();
-        }
-    }, [wasSuccessful])
-
-    const edit = (id) => () =>{
-
+    const edit = (id) => () => {
+        console.log(id)
     };
     const destroy = (params) => () => {
-        setData({...params,_method: "delete"});
+        setData({...params, _method: "delete"});
         setOpenDestroy(true);
     };
 
     const cancelDelete = () => {
         setOpenDestroy(false);
+        setOpenAddForm(false);
         reset();
     }
     const deleteRoom = () => {
-        post(route('admin.rooms.destroy', data.id));
+        post(route('admin.rooms.destroy', data.id), {
+            onSuccess: successCb
+        });
     }
 
     const successCb = () => {
-        setSuccess(true);
-        setTimeout(() => {
-            setSuccess(null);
-            reset();
-        }, 2000);
+        reset();
+        cancelDelete();
     }
 
     const show = (id) => () => get(route('admin.rooms.show', id));
 
-    const reload = (page, filter, sort, pageSize) => {
-        pageReload({page, filter, sort, pageSize}, {
-            url: "admin.rooms.index",
-            onStart: () => setLoading(true),
-            onFinish: () => setLoading(false),
-            setDefaultValues
+    const reload = (page, filters, sort, pageSize) => {
+        Inertia.visit(route("admin.rooms.index"), {
+            data: {page, filters, sort, pageSize},
+            preserveState: true,
+            only: ["rooms", "defaultValues"]
         });
     }
 
@@ -115,7 +88,9 @@ const Index = ({rooms, status}) => {
     };
 
     const handleSubmit = () => {
-        data.id?post(route('admin.rooms.store')):post(route('admin.rooms.store'));
+        post(data.id ? route('admin.rooms.store') : route('admin.rooms.update', data.id), {
+            onSuccess: handleCancel
+        });
     }
     const handleCancel = () => {
         reset();
@@ -126,9 +101,9 @@ const Index = ({rooms, status}) => {
     return (<>
             <Head title={"لیست بخش ها"}/>
             <TableLayout defaultValues={defaultValues} addNew onClickAddNew={handleAddNew} addNewTitle={"افزودن کاربر"}
-                         loading={processing || loading} success={success} status={status} errors={errors} data={rooms}
+                         loading={processing} success={success} status={status} errors={errors} data={rooms}
                          only={["rooms"]} Filter={Filter} columns={columns} processing={processing} reload={reload}>
-                <DeleteForm title={`${data?.name} بخش`} openDelete={openDestroy} disAgreeCB={cancelDelete}
+                <DeleteForm title={`بخش ${data?.name}`} openDelete={openDestroy} disAgreeCB={cancelDelete}
                             agreeCB={deleteRoom}/>
                 <AddForm values={data} errors={errors} setValues={setData} loading={processing} submit={handleSubmit}
                          cancel={handleCancel} open={openAddForm}/>
@@ -137,6 +112,6 @@ const Index = ({rooms, status}) => {
     );
 }
 
-Index.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
+Index.layout = page => <AdminLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
 
 export default Index;

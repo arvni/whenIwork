@@ -7,6 +7,7 @@ use App\Http\Requests\ShiftStoreRequest;
 use App\Http\Requests\ShiftUpdateRequest;
 use App\Interfaces\ShiftRepositoryInterface;
 use App\Models\Shift;
+use Inertia\Inertia;
 
 class ShiftController extends Controller
 {
@@ -21,6 +22,15 @@ class ShiftController extends Controller
     {
         $this->shiftRepository->create($request->all());
         return $this->responseWithSuccess(__("messages.successCreated", ["title" => "شیفت"]));
+    }
+
+    public function show(Shift $shift)
+    {
+        $shift->load("Room", "ClientRequests", "ClientRequests.user:name,id", "ClientRequests.revisableBy:name,id", "Works.User:name,id");
+        $shift->loadCount(["clientRequests" => function ($q) {
+            $q->status("accepted");
+        }]);
+        return Inertia::render("Admin/Shift/Show", ["shift" => $shift]);
     }
 
     public function update(Shift $shift, ShiftUpdateRequest $request)

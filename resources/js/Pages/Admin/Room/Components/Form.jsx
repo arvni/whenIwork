@@ -31,16 +31,6 @@ const Form = ({values, setValues, cancel, submit, errors, open, loading,disabled
                                   helperText={errors?.department ?? ""}
                                   error={Object.keys(errors).includes('department')}/>
                 </Grid>
-                <Grid item xs={12}>
-                    <SelectSearch value={values.managers}
-                                  name={"managers"}
-                                  onChange={handleChange}
-                                  multiple
-                                  url={route("admin.userApi.index")}
-                                  label={"کابران"}
-                                  helperText={errors?.managers ?? ""}
-                                  error={Object.keys(errors).includes('managers')}/>
-                </Grid>
             </Grid>
             </DialogContent>
             <DialogActions>

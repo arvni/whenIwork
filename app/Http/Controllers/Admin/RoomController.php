@@ -26,8 +26,9 @@ class RoomController extends Controller
 
     public function index(Request $request)
     {
-        $rooms = $this->roomRepository->list($request->all());
-        return Inertia::render("Admin/Room/Index", compact("rooms"));
+        $defaultValues=$request->all();
+        $rooms = $this->roomRepository->list($defaultValues);
+        return Inertia::render("Admin/Room/Index", compact("rooms","defaultValues"));
     }
 
     public function store(RoomStoreRequest $request)
@@ -38,10 +39,12 @@ class RoomController extends Controller
 
     public function show(Room $room, Request $request)
     {
-        $this->authorizeForUser(auth()->user(), "admin.Department.$room->department_id.Room.$room->id");
+        $this->authorize("view",$room );
+
         $week = fn() => $this->roomRepository->shiftList($room, $request->all());
         $room = fn() => $this->roomRepository->show($room);
-        return Inertia::render("Admin/Room/Show", compact("room", "week"));
+
+        return Inertia::render("Admin/Room/Show", compact("room", "week", ));
     }
 
     public function update(Room $room, RoomUpdateRequest $request)

@@ -1,11 +1,8 @@
-import {useEffect, useState} from "react";
+
 import {useForm} from "@inertiajs/inertia-react";
 import {Inertia} from "@inertiajs/inertia";
-import {
-    Backdrop,
-    CircularProgress
-} from "@mui/material";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+
+import AdminLayout from "@/Layouts/AdminLayout";
 import UserForm from "./Components/Form";
 
 const Add = (props) => {
@@ -38,6 +35,6 @@ const breadCrumbs = [
         icon: null
     }
 ]
-Add.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
+Add.layout = page => <AdminLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
 
 export default Add;

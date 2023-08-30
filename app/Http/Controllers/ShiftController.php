@@ -15,6 +15,7 @@ class ShiftController extends Controller
     public function __construct(ShiftRepositoryInterface $shiftRepository)
     {
         $this->shiftRepository = $shiftRepository;
+        $this->middleware("indexProvider")->only("index");
     }
 
     /**
@@ -25,8 +26,9 @@ class ShiftController extends Controller
      */
     public function index(Request $request)
     {
-        $shifts = $this->shiftRepository->list($request->all());
-        return Inertia::render("Shift/Index", compact("shifts"));
+        $defaultValues=$request->all();
+        $shifts = $this->shiftRepository->list($defaultValues);
+        return Inertia::render("Shift/Index", compact("shifts","defaultValues"));
     }
 
 }

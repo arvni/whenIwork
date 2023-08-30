@@ -5,9 +5,10 @@ import {GridActionsCellItem} from "@mui/x-data-grid";
 import Filter from "./Components/Filter";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+
 import TableLayout from "@/Layouts/TableLayout";
 import DeleteForm from "@/Components/DeleteForm";
+import AdminLayout from "@/Layouts/AdminLayout";
 
 
 const Index = ({roles, status, defaultValues}) => {
@@ -89,6 +90,6 @@ const breadCrumbs = [
     }
 ]
 
-Index.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
+Index.layout = page => <AdminLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
 
 export default Index;

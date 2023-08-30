@@ -6,13 +6,13 @@ import {Edit as EditIcon, Delete as DeleteIcon} from "@mui/icons-material";
 
 import q2o from "@/Services/querystringToObject";
 
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import TableLayout from "@/Layouts/TableLayout";
 
 import DeleteForm from "@/Components/DeleteForm";
 
 import Filter from "./Components/Filter";
 import AddForm from "./Components/AddForm";
+import AdminLayout from "@/Layouts/AdminLayout";
 
 const Index = () => {
     const {post, setData, data, reset, processing, get} = useForm()
@@ -136,6 +136,6 @@ const breadCrumbs = [
         icon: null
     }
 ]
-Index.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
+Index.layout = page => <AdminLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
 
 export default Index;

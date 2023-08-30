@@ -26,8 +26,6 @@ class RoomStoreRequest extends FormRequest
         return [
             "name" => "required|unique:rooms,name",
             "department.id" => "required|exists:departments,id",
-            "managers" => "required|array",
-            "managers.*.id" => "required|exists:users,id"
         ];
     }
 }

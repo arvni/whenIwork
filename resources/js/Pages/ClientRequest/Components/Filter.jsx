@@ -4,32 +4,38 @@ import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
-    Button,
+    Button, Tab, Typography, Tabs, ToggleButtonGroup, ToggleButton,
 } from "@mui/material";
 
 import FilterIcon from '@mui/icons-material/FilterAlt';
+import React, {useState} from "react";
 
-const Filter = ({filter, setFilter, onFilter}) => {
-    const handleChange = (e) => {
-        setFilter(prevState => ({...prevState, search: e.target.value}))
-    };
-    return (
-        <Accordion>
-            <AccordionSummary>
-                <FilterIcon/>فیلتر
-            </AccordionSummary>
-            <AccordionDetails>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={5}>
-                        <TextField sx={{width: "100%"}} name={"search"} value={filter?.search} onChange={handleChange}
-                                   label={"جستجو"}/>
+const Filter = ({defaultFilter, onFilter}) => {
+    const [filter, setFilter] = useState(defaultFilter);
+    const handleTypeChange = (_, type) => {
+        onFilter({type})();
+        setFilter({type});
+    }
+    return (<>
+            <Tabs onChange={handleTypeChange} value={filter?.type ?? "shift"} sx={{marginBottom: "1rem"}} centered
+                  title={"نوع درخواست"}>
+                <Tab value={"shift"} label={<Typography fontWeight={800}> درخواست شیفت</Typography>}/>
+                <Tab value={"changeUser"} label={<Typography fontWeight={800}> درخواست تغییر شیفت</Typography>}/>
+                <Tab value={"revised"} label={<Typography fontWeight={800}> درخواست بازبینی </Typography>}/>
+            </Tabs>
+            <Accordion>
+                <AccordionSummary>
+                    <FilterIcon/>فیلتر
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={2} sx={{display: "flex"}} justifyContent={"center"}>
+                            <Button variant={"outlined"} onClick={onFilter(filter)}>فیلتر</Button>
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} sm={2} sx={{display: "flex"}} justifyContent={"center"}>
-                        <Button variant={"outlined"} onClick={onFilter}>فیلتر</Button>
-                    </Grid>
-                </Grid>
-            </AccordionDetails>
-        </Accordion>
+                </AccordionDetails>
+            </Accordion>
+        </>
     );
 }
 

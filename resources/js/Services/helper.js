@@ -1,3 +1,4 @@
+
 const convertNumber = (number) => persianNumber(Intl.NumberFormat().format(Number.parseInt(number)));
 
 const persianNumber = (value) => {
@@ -14,11 +15,18 @@ const persianNumber = (value) => {
     return value;
 }
 
-const convertDate = (value) => value ? (new Date(value)).toLocaleString("fa-IR", {
-    localeMatcher: "best fit",
-    timeZone: "Asia/Tehran",
-    hour12: false
-}) : null;
+const convertDate = (value) => value ? Intl.DateTimeFormat('fa-IR').format(new Date(value)) : null;
+const convertTime = (value) => value ? Intl.DateTimeFormat('fa-IR', {
+    hour: "numeric",
+    minute: "numeric"
+}).format(new Date(value)) : null;
+
+const convertDateTime = (value) => value ? Intl.DateTimeFormat('fa-IR', {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric", hour: "numeric",
+    minute: "numeric",
+}).format(new Date(value)) : null;
 
 const prepareCurrentTimeInString = (addedHours = 0) => {
 
@@ -49,10 +57,13 @@ const checkTime = (startTime, endTime) => {
 }
 
 
+
 export {
     convertNumber,
     persianNumber,
     convertDate,
+    convertTime,
+    convertDateTime,
     prepareCurrentTimeInString,
     checkTime
 }

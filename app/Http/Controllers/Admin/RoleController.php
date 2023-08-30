@@ -31,12 +31,9 @@ class RoleController extends Controller
     public function index(Request $request)
     {
         $this->authorizeForUser(auth()->user(), "admin.roles.index");
-        $roles = $this->roleRepository->list($request->all());
-        $defaultValues = [
-            ...$request->except(["filters", "orderBy"]),
-            "filterModel" => $request->get("filters"),
-            "sort" => $request->get("orderBy"),
-        ];
+        $defaultValues = $request->all();
+        $roles = $this->roleRepository->list($defaultValues);
+
         return Inertia::render('Admin/Role/Index', compact("roles", "defaultValues"));
     }
 
@@ -125,9 +122,9 @@ class RoleController extends Controller
                 list($section, $parentClass, $parentId, $class, $id) = optional($sections);
                 $name = __("permissions.$item->name");
                 if ($parentClass && $class)
-                    $name = __("constants.$section") . " " . __("constants.$parentClass") . " " . ("App\Models\\$parentClass")::find($parentId)->name . " " . __("constants.$class") . " " . ("App\Models\\$class")::find($id)->name;
+                    $name = __("constants.$section") . " " . __("constants.$parentClass") . " " . optional(("App\Models\\$parentClass")::find($parentId))->name . " " . __("constants.$class") . " " . optional(("App\Models\\$class")::find($id))->name;
                 elseif ($parentClass && $parentId && class_exists("App\Models\\$parentClass")) {
-                    $name = __("constants.$section") . " " . __("constants.$parentClass") . " " . ("App\Models\\$parentClass")::find($parentId)->name;
+                    $name = __("constants.$section") . " " . __("constants.$parentClass") . " " . optional(("App\Models\\$parentClass")::find($parentId))->name;
                 }
                 return [
                     "name" => $name,

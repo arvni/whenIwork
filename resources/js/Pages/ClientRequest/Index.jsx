@@ -1,89 +1,43 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
+import {Inertia} from "@inertiajs/inertia";
 import {Head, useForm, usePage} from "@inertiajs/inertia-react";
 
-import {convertDate, convertNumber} from "@/Services/helper";
-import q2o from "@/Services/querystringToObject";
+import {convertDate} from "@/Services/helper";
 
-import {GridActionsCellItem} from "@mui/x-data-grid";
-import {colors, Stack} from "@mui/material";
+import {colors, IconButton, Stack} from "@mui/material";
 import {
     PendingActions as PendingActionsIcon,
     CheckCircle as CheckCircleIcon,
     Cancel as CancelIcon,
     Edit as EditIcon,
-    Delete as DeleteIcon
+    Delete as DeleteIcon, Close, Done
 } from '@mui/icons-material';
 
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+
 import TableLayout from "@/Layouts/TableLayout";
-import DeleteForm from "@/Components/DeleteForm";
-
 import ExpandedCell from "@/Components/ExpandedCell";
-
 import Filter from "./Components/Filter";
-import AddForm from "./Components/AddForm";
+import AddForm from "../Shift/Components/ClientRequest";
+import ExpandedComponent from "./Components/ExpandedComponent";
+import ConfirmForm from "@/Pages/Admin/Shift/Components/ConfirmForm";
+import RejectForm from "@/Pages/Admin/Shift/Components/RejectForm";
+import ClientLayout from "@/Layouts/ClientLayout";
 
 
-export const types = {
-    "cheque": "چک",
-    "deposit": "واریز به حساب",
-    "card": "کارت به کارت",
-}
-
-export const renderOtherData = ({row}) => <Stack spacing={2}>
-    {row.type === "cheque" ?
-        <span>
-            <strong>شماره چک : </strong>
-            <span>{row.chequeNumber}</span>
-        </span>
-        : row.type === "deposit" ?
-            <Stack spacing={1}>
-                <span>
-                    <strong>صاحب حساب واریز کننده : </strong>
-                    <span>{row.accountOwner}</span>
-                </span>
-                <span>
-                    <strong>بانک مبدا : </strong>
-                    <span>{row.originBank}</span>
-                </span>
-            </Stack> : row.type === "card" ?
-                <Stack spacing={1}>
-                    <span>
-                        <strong>شماره کارت : </strong>
-                        <span>{row.originCard}</span>
-                    </span>
-                    <Stack spacing={1}>
-                        <strong>کد رهگیری</strong>
-                        <span>{row.trackingCode}</span>
-                    </Stack>
-                </Stack> : null}
-</Stack>;
 const renderStatus = ({row}) => {
     switch (row.status) {
-        case "pending":
+        case "waiting":
             return <PendingActionsIcon sx={{color: colors.yellow.A700}}/>;
-        case "confirm":
+        case "accepted":
             return <CheckCircleIcon sx={{color: colors.green.A700}}/>;
-        case "reject":
+        case "canceled":
+        case "rejected":
             return <CancelIcon sx={{color: colors.red.A400}}/>;
     }
 }
 
-const Index = (props) => {
-    const {post, setData, data, reset, processing, wasSuccessful, get} = useForm({
-        price: 0,
-        type: "deposit",
-        date: new Date(),
-        chequeNumber: "",
-        accountOwner: "",
-        originBank: "",
-        originCard: "",
-        trackingCode: "",
-        description: "",
-        details: "",
-        confirm: false,
-        ...q2o()
-    })
+const Index = () => {
+    const {post, setData, data, reset, processing} = useForm()
     const columns = [
         {
             field: 'name',
@@ -94,46 +48,21 @@ const Index = (props) => {
             renderCell: ({row}) => row.user.name
         },
         {
-            field: 'price',
-            headerName: 'مبلغ (ریال)',
-            type: "number",
-            flex: .4,
-            sortable: false,
-            renderCell: ({row}) => convertNumber(row.price)
-        },
-        {
             field: 'type',
-            headerName: 'نحوه پرداخت',
+            headerName: 'نوع',
             type: "string",
             flex: .3,
-            sortable: false,
-            renderCell: ({row}) => types[row.type]
-        },
-        {
-            field: 'originBank',
-            headerName: 'سایر اطلاعات',
-            type: "string",
-            flex: 1,
-            sortable: false,
-            renderCell: renderOtherData
-        },
-        {
-            field: 'date',
-            headerName: 'تاریخ واریز',
-            type: "date",
-            flex: .3,
-            renderCell: ({value}) => convertDate(value)
         },
         {
             field: 'created_at',
-            headerName: 'تاریخ ایجاد',
+            headerName: 'تاریخ درخواست',
             type: "date",
-            flex: .4,
+            flex: .3,
             renderCell: ({value}) => convertDate(value)
         },
         {
-            field: 'description',
-            headerName: ' توضیحات پرداخت کننده',
+            field: 'message',
+            headerName: 'توضیحات',
             type: "string",
             sortable: false,
             flex: .5,
@@ -150,159 +79,170 @@ const Index = (props) => {
             renderCell: renderStatus
         },
         {
-            field: 'confirmed_by',
+            field: 'revisable_by',
             headerName: 'بررسی کننده',
             type: "string",
             flex: .5,
-            renderCell: ({row}) => row.confirmed_by?.name
+            renderCell: ({row}) => row.revisable_by?.name
         },
         {
-            field: 'confirmed_at',
-            headerName: 'تاریخ بررسی',
+            field: 'comment',
+            headerName: 'توضیحات برزسی کننده',
+            type: "string",
+            flex: .5,
+        },
+        {
+            field: 'updated_at',
+            headerName: 'تاریخ آخرین تغییر',
             type: "string",
             flex: .4,
             renderCell: ({value}) => value ? convertDate(value) : null
         },
         {
-            field: 'details',
-            headerName: 'توضیحات بررسی کننده',
-            type: "string",
-            flex: .5,
-            sortable: false,
-            renderCell: ExpandedCell
-        },
-        {
             field: 'id',
             headerName: '#',
             type: 'actions',
+            sortable: false,
             flex: .2,
             renderCell: (params) => {
                 let cols = []
-                if (params.row.status === "pending") {
-                    if (auth.permissions.includes("ClientRequest Add"))
-                        cols.push(<GridActionsCellItem icon={<EditIcon/>} label="بروررسانی"
-                                                       onClick={editClientRequest(params.row.id)}
-                                                       showInMenu/>);
-                    if (auth.permissions.includes("ClientRequest Confirm"))
-                        cols.push(<GridActionsCellItem icon={<EditIcon/>} label="بررسی"
-                                                       onClick={confirmClientRequest(params.row.id)}
-                                                       showInMenu/>)
-                    if (auth.permissions.includes("ClientRequest Delete"))
-                        cols.push(<GridActionsCellItem icon={<DeleteIcon/>} label="حذف" showInMenu
-                                                       onClick={deleteClientRequest(params.row)}/>)
+                if (params.row.status === "waiting") {
+                    if (auth.user.id === params.row.user.id && params.row.status === "waiting") {
+                        cols.push(<IconButton key={"edit-" + params.value} title="بروررسانی"
+                                              onClick={editClientRequest(params.row)}
+                                              color={"warning"}>
+                            <EditIcon/>
+                        </IconButton>);
+                        cols.push(<IconButton key={"cancel-" + params.value} title="حذف"
+                                              onClick={deleteClientRequest(params.row)} color={"error"}>
+                            <DeleteIcon/>
+                        </IconButton>);
+                    }
+                    if (defaultValues?.filters?.type === "revised")
+                        cols.push(<Stack direction={"row"} gap={1}>
+                            <IconButton onClick={handleReject(params.value)} color={"error"} title={"رد"}>
+                                <Close/>
+                            </IconButton>
+                            <IconButton onClick={handleConfirm(params.value)} color={"success"} title={"تایید"}>
+                                <Done/>
+                            </IconButton>
+                        </Stack>)
                 }
+
                 return cols;
             }
         }
     ];
-    const {clientRequests, status, errors, auth} = usePage().props;
+    const {clientRequests, status, errors, auth, success, defaultValues} = usePage().props;
     const [loading, setLoading] = useState(false);
-    const [openConfirmForm, setOpenConfirmForm] = useState(false);
-    const [clientRequest, setClientRequest] = useState(null);
-    const [success, setSuccess] = useState(null);
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const [openAddForm, setOpenAddForm] = useState(false);
-    const [edit, setEdit] = useState(false);
-    const [url, setUrl] = useState("");
-    const [defaultValues, setDefaultValues] = useState({
-        sort: {field: 'created_at', sort: "desc"},
-        filterModel: {search: ""},
-        page: 0,
-        pageSize: 10
-    });
-    const editClientRequest = (id) => async () => {
-        setEdit(true);
+
+    const [openConfirm, setOpenConfirm] = useState(false);
+    const [openReject, setOpenReject] = useState(false);
+
+    const editClientRequest = (id) => () => {
         setLoading(true);
-        const res = await axios.get(route("clientRequests.show", id));
-        setData({...res.data.data, _method: 'put'});
-        setOpenAddForm(true);
-        setUrl(route('clientRequests.update', id))
-        setLoading(false);
+        fetchClientRequest(id).finally(() => {
+            setOpenAddForm(true);
+            setLoading(false);
+        });
     };
+    const fetchClientRequest = async (id) => id ? axios.get(route("clientRequestsApi.show", id)).then((res) => {
+        setData({...res.data.data, _method: 'put'});
+    }) : null;
     const successCb = () => {
-        setSuccess(true);
         reset();
-        setOpenConfirmForm(false);
         setOpenAddForm(false);
         setOpenDeleteForm(false);
-        setTimeout(() => setSuccess(null), 200);
     }
-    const confirmClientRequest = (id) => async () => {
-        setEdit(true);
-        setLoading(true);
-        const res = await axios.get(route("clientRequests.show", id));
-        setData(previousData => ({...previousData, ...res.data.data}));
-        setUrl(route("clientRequests.confirm", id));
-        setOpenConfirmForm(true);
-        setLoading(false);
-    };
+
     const deleteClientRequest = (params) => () => {
-        setClientRequest(params);
-        setData({_method: "delete"});
+        setData({...params, _method: "delete"});
         setOpenDeleteForm(true);
     };
-    const pageReload = (page, filter, sort, pageSize) => {
-        let filterValues = {};
-        if (page)
-            filterValues.page = page + 1;
-        if (filter)
-            filterValues.filterModel = filter
-        if (sort)
-            filterValues.sort = sort;
-        if (pageSize)
-            filterValues.pageSize = pageSize;
-        setDefaultValues(prevState => ({...prevState, ...filterValues}));
-        get(route('clientRequests.index', filterValues), {
-            only: ["clientRequests", "status"]
-        });
-    }
-    const handleCloseDeleteForm = () => {
-        setClientRequest(null);
-        reset();
-        setOpenDeleteForm(false);
-    };
+    const pageReload = (page, filters, sort, pageSize) => Inertia.visit(route('client.clientRequests.index'), {
+        only: ["clientRequests", "status", "defaultValues"],
+        data: {page, filters, sort, pageSize},
+        preserveState: true,
+    });
 
     const handleDestroy = async () => {
-        post(route('clientRequests.destroy', clientRequest.id), {
+        post(route('client.clientRequests.destroy', data.id), {
             preserveState: true,
             onSuccess: successCb
         });
-        handleCloseDeleteForm();
     };
-    const handleSubmitForm = () => post(url, {onSuccess: successCb});
+    const handleSubmitForm = () => post(data.id ? route('client.clientRequests.update', data.id) : route("client.clientRequests.store"), {onSuccess: successCb});
     const addNew = () => {
+        setData({type: "takeLeave"});
         setOpenAddForm(true);
-        setUrl(route("clientRequests.store"))
     }
     const handleClose = () => {
         reset();
         setOpenAddForm(false);
-        setOpenConfirmForm(false);
-        setEdit(false);
+        setOpenConfirm(false);
+        setOpenReject(false);
+        reset();
+    }
+    const handleCloseDeleteForm = () => {
+        setOpenDeleteForm(false);
+        reset();
+    }
+
+    const getDataRequestData = (id) => {
+        setData(clientRequests.data.find((item) => item.id === id));
+    }
+
+    const handleConfirm = (id) => () => {
+        getDataRequestData(id);
+        setOpenConfirm(true);
+    }
+
+    const handleReject = (id) => () => {
+        getDataRequestData(id);
+        setOpenReject(true);
+    }
+
+    const confirm = () => {
+        post(route("client.clientRequests.confirm", data.id), {
+            onSuccess: handleClose
+        });
+    }
+
+    const reject = () => {
+        post(route("client.clientRequests.reject", data.id), {
+            onSuccess: handleClose
+        })
+    }
+
+    const handleChange = (key, value) => {
+        setData(previousData => ({...previousData, [key]: value}));
     }
     return (
         <>
             <Head title={"لیست درخواست ها"}/>
             <TableLayout defaultValues={defaultValues} success={success} status={status} reload={pageReload}
                          columns={columns} data={clientRequests} rowHeight={100}
-                         loading={processing || loading} Filter={Filter} addNew addNewTitle={"ثپت پرداخت"}
-                         onClickAddNew={addNew} errors={errors}>
-                <DeleteForm title={`پرداخت`} agreeCB={handleDestroy}
-                            disAgreeCB={handleCloseDeleteForm} openDelete={openDeleteForm}/>
-                <AddForm title={`${!edit ? "ثبت" : "بروزرسانی"} پرداخت`} loading={processing || loading}
-                         open={openAddForm}
-                         values={data} setValues={setData} setOpen={setOpenAddForm} submit={handleSubmitForm}
-                         onClose={handleClose}/>
+                         addNew={defaultValues?.filters?.type === "takeLeave"}
+                         onClickAddNew={addNew} loading={processing || loading} Filter={Filter}
+                         expandedKey={"requestable"} ExpandedComponent={ExpandedComponent}>
             </TableLayout>
+            <AddForm clientRequest={data} open={openAddForm} onClose={handleClose} onSubmit={handleSubmitForm}
+                     onChange={handleChange}/>
+
+            <ConfirmForm onConfirm={confirm} onClose={handleClose} open={openConfirm} request={data}/>
+            <RejectForm onChange={handleChange} onSubmit={reject} onClose={handleClose} open={openReject}
+                        request={data}/>
         </>);
 }
 const breadCrumbs = [
     {
-        title: "پرداخت ها",
+        title: "درخواست ها",
         link: null,
         icon: null
     }
 ]
-Index.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
+Index.layout = page => <ClientLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
 
 export default Index;

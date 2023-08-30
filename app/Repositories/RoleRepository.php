@@ -19,7 +19,7 @@ class RoleRepository implements RoleRepositoryInterface
     {
         $query = $this->role->withCount(['users','permissions']);
         $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["orderBy"]);
+        $this->applyOrderBy($query, $queryData["sort"]);
         return $this->applyPaginate($query,$queryData["pageSize"]);
     }
 

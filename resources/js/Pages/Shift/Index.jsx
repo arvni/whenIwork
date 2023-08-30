@@ -1,35 +1,33 @@
 import {useState} from "react";
 import {Inertia} from "@inertiajs/inertia";
 import {Head, useForm} from "@inertiajs/inertia-react";
-import {GridActionsCellItem} from "@mui/x-data-grid";
-import {
-    Cancel as CancelIcon,
-    AssignmentTurnedIn as AssignmentTurnedInIcon,
-    ChangeCircle as ChangeCircleIcon
-} from "@mui/icons-material";
 
-import Authenticated from "@/Layouts/AuthenticatedLayout";
+import {GridActionsCellItem} from "@mui/x-data-grid";
+import {AssignmentTurnedIn as AssignmentTurnedInIcon, ChangeCircle as ChangeCircleIcon} from "@mui/icons-material";
+
 import TableLayout from "@/Layouts/TableLayout";
 import Filter from "./Components/Filter";
 import ClientRequest from "./Components/ClientRequest";
-import ExpandedComponent from "@/Pages/Shift/Components/ExpandedComponent";
+import ExpandedComponent from "./Components/ExpandedComponent";
+
+
+import {convertDate} from "@/Services/helper";
+import ClientLayout from "@/Layouts/ClientLayout";
 
 
 const Index = ({shifts, defaultValues}) => {
     const {post, processing, data, setData, reset} = useForm({});
-    const pageReload = (page, filterModel, sort, pageSize) => {
-        Inertia.visit(route("client.shifts.index"), {
+    const [open, setOpen] = useState(false);
+    const pageReload = (page, filters, sort, pageSize) => Inertia.visit(route("client.shifts.index"), {
             data: {
-                filterModel,
+                filters,
                 sort,
                 pageSize,
                 page
             },
             only: ["shifts", "defaultValues"],
             preserveState: true
-        })
-    };
-    const [open, setOpen] = useState(false);
+        });
     const columns = [
         {
             field: 'rooms.name',
@@ -40,6 +38,7 @@ const Index = ({shifts, defaultValues}) => {
         {
             field: 'date',
             headerName: 'تاریخ',
+            renderCell: ({value}) => convertDate(value)
         },
         {
             field: 'started_at',
@@ -61,22 +60,24 @@ const Index = ({shifts, defaultValues}) => {
             textAlign: "center",
             renderCell: (params) => {
                 let cols = []
-                if (params.row.type === "open")
-                    cols.push(!params.row.client_requests_count ?
-                        <GridActionsCellItem key={`shift-${params.row.id}`}
-                                             icon={<AssignmentTurnedInIcon color={"info"}/>} label="درخواست شیفت"
-                                             onClick={handleOpenRequest(params.row, "shift")}/> :
-                        <GridActionsCellItem key={`delete-${params.row.id}`} icon={<CancelIcon color={"red"}/>}
-                                             label="کنسل کردن درخواست"/>
-                    );
-                else
-                    cols.push(<GridActionsCellItem key={`change-${params.row.id}`}
-                                                   icon={<ChangeCircleIcon color={"warning"}/>} label="تغییر شیفت"
-                                                   onClick={handleOpenRequest(params.row, "changeUser")}/>)
+                if (new Date(params.row.started_at_dateTime) > new Date()) {
+                    if (params.row.type === "open")
+                        !params.row.client_requests_count && params.row.noUsers >= params.row.works_count && cols.push(
+                            <GridActionsCellItem key={`shift-${params.row.id}`}
+                                                 icon={<AssignmentTurnedInIcon color={"info"}/>} label="درخواست شیفت"
+                                                 onClick={handleOpenRequest(params.row, "shift")}/>
+                        );
+                    else
+                        !params.row.client_requests_count && cols.push(<GridActionsCellItem
+                            key={`change-${params.row.id}`}
+                            icon={<ChangeCircleIcon color={"warning"}/>} label="تغییر شیفت"
+                            onClick={handleOpenRequest(params.row, "changeUser")}/>)
+                }
                 return cols;
             }
         },
     ];
+
     const handleChange = (key, value) => {
         setData(previousData => ({...previousData, [key]: value}));
     }
@@ -85,10 +86,11 @@ const Index = ({shifts, defaultValues}) => {
         setOpen(false);
     }
     const handleOpenRequest = (params, type) => () => {
-        setData({shift: params, type});
+        setData({requestable: params, type});
         setOpen(true);
     }
-    const handleSubmit = () => post(route("clientRequests.store"), {onSuccess: handleCloseRequest});
+    const handleSubmit = () => post(route("client.clientRequests.store"), {onSuccess: handleCloseRequest});
+
     return <TableLayout loading={processing} reload={pageReload} defaultValues={defaultValues} data={shifts}
                         columns={columns} Filter={Filter} ExpandedComponent={ExpandedComponent}
                         expandedKey={"client_requests"}>
@@ -106,6 +108,6 @@ const breadcrumbs = [
     }
 ];
 
-Index.layout = (page) => <Authenticated breadcrumbs={breadcrumbs} children={page} auth={page.props.auth}/>
+Index.layout = (page) => <ClientLayout breadcrumbs={breadcrumbs} children={page} auth={page.props.auth}/>
 
 export default Index;

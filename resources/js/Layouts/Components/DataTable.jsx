@@ -25,18 +25,15 @@ const renderCell = (row, col) => {
 function Row(props) {
     const {row, columns, expandedKey, ExpandedComponent} = props;
     const [open, setOpen] = useState(false);
-
+    const hasExpandedRow = !!row[expandedKey]
     return (
         <>
             <TableRow sx={{'& > *': {borderBottom: 'unset'}}}>
                 {ExpandedComponent && <TableCell>
-                    {row[expandedKey].length ? <IconButton
-                        aria-label="expand row"
-                        size="small"
-                        onClick={() => setOpen(!open)}
-                    >
+                    {hasExpandedRow &&
+                    <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
                         {open ? <KeyboardArrowUp/> : <KeyboardArrowLeft/>}
-                    </IconButton> : null}
+                    </IconButton>}
                 </TableCell>}
                 {columns.map(col => <TableCell key={col.field + "-" + row.id}>
                     {renderCell(row, col)}
@@ -100,11 +97,13 @@ const DataTable = ({
             <TableBody>
                 {rows.length > 0 ? rows.map(row => <Row key={row.id} row={row} columns={columns}
                                                         expandedKey={expandedKey}
-                                                        ExpandedComponent={ExpandedComponent}/>) : <TableRow>
-                    <TableCell colSpan={columns.length + 1} sx={{textAlign: "center"}}>
-                        {localeText.noResultsOverlayLabel}
-                    </TableCell>
-                </TableRow>}
+                                                        ExpandedComponent={ExpandedComponent}/>) :
+
+                    <TableRow>
+                        <TableCell colSpan={columns.length + 1} sx={{textAlign: "center"}}>
+                            {localeText.noResultsOverlayLabel}
+                        </TableCell>
+                    </TableRow>}
             </TableBody>
         </Table>
         {page ? <TablePagination

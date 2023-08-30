@@ -20,8 +20,8 @@ class PermissionRepository implements PermissionRepositoryInterface
     {
         $query = $this->permission->with("Roles");
         $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["orderBy"]);
-        return $this->applyPaginate($query,$queryData["pageSize"]);
+        $this->applyOrderBy($query, $queryData["sort"]);
+        return $this->applyPaginate($query, $queryData["pageSize"]);
     }
 
     public function create(array $permissionData)
@@ -41,7 +41,7 @@ class PermissionRepository implements PermissionRepositoryInterface
 
     public function delete(Permission $permission)
     {
-        if ($permission->roles()->count()<1)
+        if ($permission->roles()->count() < 1)
             $permission->delete();
     }
 
@@ -61,5 +61,10 @@ class PermissionRepository implements PermissionRepositoryInterface
     private function applyPaginate($query, $pageSize)
     {
         return $query->paginate($pageSize);
+    }
+
+    public function findOrCreateByName(string $name)
+    {
+        return $this->permission->findOrCreate($name);
     }
 }

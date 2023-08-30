@@ -1,8 +1,8 @@
 import {useForm} from "@inertiajs/inertia-react";
 import {Inertia} from "@inertiajs/inertia";
 import {Backdrop,CircularProgress} from "@mui/material";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import AddForm from './Components/Form';
+import AdminLayout from "@/Layouts/AdminLayout";
 
 const Edit = ({permissions, role}) => {
     const {data, setData, post, processing} = useForm({...role, _method: "put"});
@@ -32,5 +32,5 @@ const breadCrumbs = [
     }
 ]
 
-Edit.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
+Edit.layout = page => <AdminLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
 export default Edit;

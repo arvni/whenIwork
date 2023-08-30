@@ -4,8 +4,7 @@ import {
     Backdrop,
     CircularProgress, Divider, Stack, Typography
 } from "@mui/material";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import JalaliCalendar from "@/Components/JalaliCalendar";
+
 import q2o from "@/Services/querystringToObject";
 import DayShiftsContainer from "@/Pages/Admin/Room/Components/DayShiftsContainer";
 import ShiftForm from "@/Pages/Admin/Room/Components/ShiftForm";
@@ -13,6 +12,8 @@ import {prepareCurrentTimeInString} from "@/Services/helper";
 import {fetchData} from "@/Services/fetchData";
 import DeleteForm from "@/Components/DeleteForm";
 import {Inertia} from "@inertiajs/inertia";
+import DatePickerRange from "@/Components/DateRangePicker";
+import AdminLayout from "@/Layouts/AdminLayout";
 
 
 const Show = () => {
@@ -41,9 +42,9 @@ const Show = () => {
         preserveState: true
     });
 
-    const handleDateChange = (v) => {
-        setFilters({date: v});
-        reloadPage(v);
+    const handleDateChange = (name,value) => {
+        setFilters({[name]: value});
+        reloadPage(value);
     }
     const handleSubmit = () => {
         post(data.id ? route('admin.shifts.update', data.id) : route('admin.shifts.store'), {
@@ -61,9 +62,12 @@ const Show = () => {
         setOpenAddShift(false);
         resetData();
     }
-    const handleShow = (id) => () => {
+    const handleShow = (id) => e => {
+        e.preventDefault();
+        Inertia.visit(route("admin.shifts.show", id));
 
     }
+
     const handleEdit = (id) => () => {
         setWaiting(true);
         fetchData(route("admin.shiftApi.show", id))
@@ -121,7 +125,7 @@ const Show = () => {
                     variant={"h1"}
                     fontSize={"xxx-large"}
                 >{room.name}</Typography>
-                <JalaliCalendar onChange={handleDateChange} value={filters?.date}/>
+                <DatePickerRange weekPicker onChange={handleDateChange} value={filters?.date} name={"date"}/>
             </Stack>
             <Divider sx={{marginBottom: "1em"}}/>
             {week.days.map(day =>
@@ -163,7 +167,7 @@ const breadCrumbs = [
         icon: null
     }
 ]
-Show.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={[...breadCrumbs, {
+Show.layout = page => <AdminLayout auth={page.props.auth} children={page} breadcrumbs={[...breadCrumbs, {
     title: page.props.room.name,
     link: null,
     icon: null

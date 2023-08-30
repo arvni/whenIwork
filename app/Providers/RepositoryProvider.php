@@ -25,7 +25,7 @@ class RepositoryProvider extends ServiceProvider
      */
     public function boot()
     {
-        $models = ["User","Permission","Role", "Department","Room","Shift","ClientRequest"];
+        $models = ["User", "Permission", "Role", "Department", "Room", "Shift", "ClientRequest", "Work", "Leave"];
         foreach ($models as $model) {
             $this->app->bind("App\Interfaces\\{$model}RepositoryInterface", "App\Repositories\\{$model}Repository");
         }

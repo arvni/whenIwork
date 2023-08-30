@@ -18,13 +18,13 @@ const TableLayout = ({
                          ExpandedComponent = null,
                          expandedKey
                      }) => {
-    const handlePageSizeChange = (p) => reload(1, defaultValues.filterModel, defaultValues.sort[0], p);
-    const handlePageChange = (p) => reload(p + 1, defaultValues.filterModel, defaultValues.sort[0], defaultValues.pageSize);
+    const handlePageSizeChange = (p) => reload(1, defaultValues.filters, defaultValues.sort[0], p);
+    const handlePageChange = (p) => reload(p + 1, defaultValues.filters, defaultValues.sort[0], defaultValues.pageSize);
     const handleFilterChange = (filter) => () => reload(1, filter, defaultValues.sort[0], defaultValues.pageSize);
-    const handleSortChange = (sortModel) => reload(1, defaultValues.filterModel, sortModel, defaultValues.pageSize)
+    const handleSortChange = (sortModel) => reload(1, defaultValues.filters, sortModel, defaultValues.pageSize)
     return (
         <>
-            {Filter && <Filter defaultFilter={defaultValues.filterModel} onFilter={handleFilterChange}/>}
+            {Filter && <Filter defaultFilter={defaultValues.filters} onFilter={handleFilterChange}/>}
             <DataTable rows={data.data}
                        ExpandedComponent={ExpandedComponent}
                        columns={columns}

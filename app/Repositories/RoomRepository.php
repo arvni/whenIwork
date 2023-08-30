@@ -2,51 +2,54 @@
 
 namespace App\Repositories;
 
+use App\Interfaces\PermissionRepositoryInterface;
 use App\Interfaces\RoomRepositoryInterface;
 use App\Models\Role;
 use App\Models\Room;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
+use JetBrains\PhpStorm\Pure;
 use Morilog\Jalali\Jalalian;
-use Spatie\Permission\Models\Permission;
 
-class RoomRepository implements RoomRepositoryInterface
+class RoomRepository extends BaseRepository implements RoomRepositoryInterface
 {
+    private PermissionRepositoryInterface $permissionRepository;
 
-    private Room $room;
-
-    public function __construct(Room $room)
+    #[Pure]
+    public function __construct(Room $room, PermissionRepositoryInterface $permissionRepository)
     {
-        $this->room = $room;
+        parent::__construct($room, Room::query()->withAggregate("Department","name"));
+        $this->permissionRepository = $permissionRepository;
     }
 
-    public function list(array $queryData, $type = "admin")
+    public function listAllowed(array $queryData)
     {
-
-        $query = $this->createQuery($type);
-        $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["orderBy"]);
-        return $this->applyPaginate($query, $queryData["pageSize"]);
+        $this->query = $this->createQuery();
+        return $this->list($queryData);
     }
 
 
-    public function create(array $roomData)
+    public function create(array $data)
     {
-        $room = new $this->room($roomData);
-        $room->Department()->associate($roomData["department"]["id"]);
+        $room = new $this->model($data);
+        $room->Department()->associate($data["department"]["id"]);
         $room->save();
-        $this->createPermissions($room->id, $roomData["department"]["id"]);
-        $this->storeManagers($room, $roomData["managers"]);
+        $this->createPermissions($room->id, $data["department"]["id"]);
         return $room;
 
     }
 
     private function createPermissions($roomId, $departmentId)
     {
-        Permission::findOrCreate("admin.Department.$departmentId.Room.$roomId");
-        Permission::findOrCreate("client.Department.$departmentId.Room.$roomId");
+        $permissionNames = [
+            "admin.Department.$departmentId.Room.$roomId",
+            "client.Department.$departmentId.Room.$roomId"
+        ];
+
+        foreach ($permissionNames as $name) {
+            $this->permissionRepository->findOrCreateByName($name);
+        }
+
     }
 
     public function show(Room $room)
@@ -54,17 +57,14 @@ class RoomRepository implements RoomRepositoryInterface
         $room->load(["Department" => function ($q) {
             $q->select(["id", "name"]);
         }]);
-        $room->managers = $room->Managers()->get(["id", "name"]);
         return $room;
     }
 
     public function shiftList(Room $room, array $queryData)
     {
-        $query = $room->Shifts()->with(["Attendances" => function ($q) {
-            $q->with("attendable");
-        }]);
+        $query = $room->Shifts()->withCount(["AcceptedClientRequests","WaitingClientRequests","ClientRequests"]);
         $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["orderBy"] ?? ["field" => "date", "sort" => "asc"]);
+        $this->applyOrderBy($query, $queryData["sort"] ?? ["field" => "date", "sort" => "asc"]);
         $shifts = $query->get();
         return $this->prepareWeekDays($shifts, $queryData["filters"]["date"]);
     }
@@ -90,9 +90,10 @@ class RoomRepository implements RoomRepositoryInterface
 
     public function edit(Room $room, $roomNewData)
     {
+        $room->fill($roomNewData);
         $room->Department()->associate($roomNewData["department"]["id"]);
-        $room->update($roomNewData);
-        $this->storeManagers($room, $roomNewData["managers"]);
+        if ($room->isDirty())
+            $room->update();
         return $room;
     }
 
@@ -103,39 +104,23 @@ class RoomRepository implements RoomRepositoryInterface
         return false;
     }
 
-    private function applyFilters($query, $filters)
+    protected function applyFilters($query, $filters)
     {
         if (isset($filters["search"])) {
-            $query->where("name", "like", "%" . $filters["search"] . "%");
+            $query->search($filters["search"]);
         }
+        return $query;
     }
 
-    private function applyOrderBy($query, $orderBy)
-    {
-        $query->orderBy($orderBy["field"], $orderBy["sort"]);
-    }
-
-    private function applyPaginate($query, $pageSize)
-    {
-        return $query->paginate($pageSize);
-    }
 
     public function findById($id)
     {
-        return $this->room->find($id);
+        return $this->model->find($id);
     }
 
-    private function storeManagers(Room $room, array $users)
+    private function createQuery()
     {
-        $permission = Permission::findByName("admin.Department.$room->department_id.Room.$room->id");
-        $permission->Users()->sync(collect($users)->pluck("id")->toArray());
-    }
-
-    private function createQuery($type = "admin")
-    {
-        if (auth()->user()->can("$type.departments.index"))
-            return $this->room->with("Department");
-        $permissions = auth()->user()->permissions()->where("name", "like", "$type.Department.%")->get(["name"])->pluck("name");
+        $permissions = auth()->user()->permissions()->where("name", "like", "client.Department.%")->get(["name"])->pluck("name");
         $departments = [];
         $rooms = [];
         foreach ($permissions as $permission) {
@@ -146,16 +131,15 @@ class RoomRepository implements RoomRepositoryInterface
                 $rooms[] = last($explodedPermissionName);
         }
 
-
-
-        return $this->room->where(function ($q) use ($departments, $rooms) {
+        return $this->model->where(function ($q) use ($departments, $rooms) {
             $q->whereIn("id", $rooms)->orWhereIn("department_id", $departments);
         })->with("Department");
     }
 
     public function allowedUsersList(Room $room, array $queryData)
     {
-        return User::permission("client.Department.$room->department_id.Room.$room->id")
+        $permission="client.Department.$room->department_id.Room.$room->id";
+        return User::permission($permission)
             ->search($queryData["search"] ?? "")
             ->select(["id", "name"])
             ->paginate(10);
@@ -168,5 +152,4 @@ class RoomRepository implements RoomRepositoryInterface
             ->select(["id", "name"])
             ->paginate(10);
     }
-
 }

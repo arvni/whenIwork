@@ -1,8 +1,8 @@
 import {useForm} from "@inertiajs/inertia-react";
 import {Inertia} from "@inertiajs/inertia";
 import {CircularProgress,Backdrop } from "@mui/material";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import AddForm from './Components/Form';
+import AdminLayout from "@/Layouts/AdminLayout";
 
 const Add = ({permissions}) => {
     const {data, setData, post, processing} = useForm({name: "", permissions: []});
@@ -32,5 +32,5 @@ const breadCrumbs = [
     }
 ]
 
-Add.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
+Add.layout = page => <AdminLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
 export default Add;

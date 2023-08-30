@@ -5,6 +5,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import {Stack} from "@mui/material";
 
 export default function CancelRequest({open, onClose, onAccept}) {
 
@@ -15,19 +16,20 @@ export default function CancelRequest({open, onClose, onAccept}) {
         aria-describedby="alert-dialog-description"
     >
         <DialogTitle id="alert-dialog-title">
-            {"Use Google's location service?"}
+            {"لغو درخواست"}
         </DialogTitle>
         <DialogContent>
             <DialogContentText id="alert-dialog-description">
-                Let Google help apps determine location. This means sending anonymous
-                location data to Google, even when no apps are running.
+                آیا میخواهید درخواست خود را کنسل کنید ؟
             </DialogContentText>
         </DialogContent>
         <DialogActions>
-            <Button onClick={onClose}>Disagree</Button>
-            <Button onClick={onAccept} autoFocus>
-                Agree
-            </Button>
+            <Stack spacing={2} direction={"row"}>
+                <Button onClick={onAccept} autoFocus variant={"contained"} sx={{color: "#f2f2f2"}}>
+                    بله
+                </Button>
+                <Button onClick={onClose}>خیر</Button>
+            </Stack>
         </DialogActions>
     </Dialog>);
 }

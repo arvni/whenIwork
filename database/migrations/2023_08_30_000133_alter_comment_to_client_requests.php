@@ -13,10 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table("client_requests",function (Blueprint $table){
-            $table->after("user_id",function (Blueprint $t){
-                $t->nullableMorphs("revisable_by");
-            });
+        Schema::table('client_requests', function (Blueprint $table) {
+            $table->longText("comment");
         });
     }
 
@@ -27,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table("client_requests",function (Blueprint $table){
-            $table->dropMorphs("revisable_by");
+        Schema::table('client_requests', function (Blueprint $table) {
+            //
         });
     }
 };

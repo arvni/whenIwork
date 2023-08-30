@@ -32,12 +32,8 @@ class UserController extends Controller
      */
     public function index(UsersIndexRequest $request): Response
     {
-        $users = $this->userRepository->list($request->all());
-        $defaultValues = [
-            ...$request->except(["filters", "orderBy"]),
-            "filterModel" => $request->get("filters"),
-            "sort" => $request->get("orderBy")
-        ];
+        $defaultValues =$request->all();
+        $users = $this->userRepository->list($defaultValues);
         return Inertia::render('Admin/User/Index', compact("users", "defaultValues"));
     }
 

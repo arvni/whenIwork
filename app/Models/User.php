@@ -76,6 +76,27 @@ class User extends Authenticatable
         return $this->hasMany(ClientRequest::class);
     }
 
+    public function Works()
+    {
+        return $this->hasMany(Work::class);
+    }
+
+    public function Shifts()
+    {
+        return $this->belongsToMany(Shift::class,"works")->withPivot("accepted")->wherePivot("accepted",true);
+    }
+
+
+    public function Leaves()
+    {
+        return $this->hasMany(Leave::class);
+    }
+
+    public function AcceptedLeaves()
+    {
+        return $this->hasMany(Leave::class, "acceptor_id");
+    }
+
     public function scopeSearch($query, $search)
     {
         return $query->where(function ($q) use ($search) {
@@ -86,6 +107,11 @@ class User extends Authenticatable
     public function RevisableClientRequests()
     {
         return $this->morphMany(ClientRequest::class, "revisable_by");
+    }
+
+    public function Role()
+    {
+
     }
 
 }

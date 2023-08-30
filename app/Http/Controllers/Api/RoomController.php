@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class RoomController extends Controller
 {
-    private $roomRepository;
+    private RoomRepositoryInterface $roomRepository;
     public function __construct(RoomRepositoryInterface $roomRepository)
     {
         $this->roomRepository=$roomRepository;

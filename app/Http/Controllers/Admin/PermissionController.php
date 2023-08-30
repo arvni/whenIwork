@@ -31,8 +31,9 @@ class PermissionController extends Controller
      */
     public function index(Request $request)
     {
-        $permissions = $this->permissionRepository->list($request->all());
-        return Inertia::render('Admin/Permission/Index', compact("permissions"));
+        $defaultValues = $request->all();
+        $permissions = $this->permissionRepository->list($defaultValues);
+        return Inertia::render('Admin/Permission/Index', compact("permissions", "defaultValues"));
     }
 
     /**
@@ -58,7 +59,7 @@ class PermissionController extends Controller
     public function update(PermissionRequest $request, Permission $permission)
     {
 
-        $this->permissionRepository->edit($permission,$request->all());
+        $this->permissionRepository->edit($permission, $request->all());
         return redirect()->back()->with(["status" => $request["name"] . " permission successfully added", "success" => true]);
     }
 
@@ -70,7 +71,6 @@ class PermissionController extends Controller
      */
     public function destroy(Permission $permission)
     {
-
         $title = $permission->name;
         if (!$permission->roles()->count()) {
             $this->permissionRepository->delete($permission);

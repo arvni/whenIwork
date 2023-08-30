@@ -12,11 +12,12 @@ interface UserRepositoryInterface
 
     public function create(array $userData);
 
+    public function findById($id);
+
     public function show(User $user);
 
-    public function edit(User $user, $userNewData);
 
-    //public function updatePassword(User $user, string $password);
+    public function edit(User $user, $userNewData);
 
     public function delete(User $user);
 }

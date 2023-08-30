@@ -39,4 +39,9 @@ class Work extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function scopeAccepted($query)
+    {
+        return $query->where("accepted",true);
+    }
 }

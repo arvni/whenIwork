@@ -21,8 +21,8 @@ class DepartmentController extends Controller
     public function index(Request $request)
     {
         $this->authorizeForUser(auth()->user(), "admin.departments.index");
-        $departments = $this->departmentRepository->list($request->all());
-        $defaultValues = [...$request->except(["filters", "orderBy"]), "filterModel" => $request->get("filters"), "sort" => $request->get("orderBy")];
+        $defaultValues =$request->all();
+        $departments = $this->departmentRepository->list($defaultValues);
         return Inertia::render("Admin/Department/Index", compact("departments", "defaultValues"));
     }
 
@@ -35,8 +35,8 @@ class DepartmentController extends Controller
     public function show(Department $department, Request $request)
     {
         $this->authorizeForUser(auth()->user(), "admin.Department.$department->id");
-        $department = $this->departmentRepository->show($department, $request->all());
-        $defaultValues = [...$request->except(["filters", "orderBy"]), "filterModel" => $request->get("filters"), "sort" => $request->get("orderBy")];
+        $defaultValues =$request->all();
+        $department = $this->departmentRepository->show($department, $defaultValues);
         return Inertia::render("Admin/Department/Show", compact("department","defaultValues"));
     }
 

@@ -3,66 +3,59 @@
 namespace App\Repositories;
 
 use App\Interfaces\ShiftRepositoryInterface;
+use App\Interfaces\WorkRepositoryInterface;
 use App\Models\Attendance;
+use App\Models\ClientRequest;
 use App\Models\Shift;
-use App\Models\User;
 use App\Models\Work;
 use Carbon\Carbon;
+use Spatie\Permission\Models\Permission;
 
-class ShiftRepository implements ShiftRepositoryInterface
+class ShiftRepository extends BaseRepository implements ShiftRepositoryInterface
 {
+    protected $workRepository;
 
-    private Shift $shift;
-
-    public function __construct(Shift $shift)
+    public function __construct(Shift $shift, WorkRepositoryInterface $workRepository)
     {
-        $this->shift = $shift;
+        $this->workRepository = $workRepository;
+        parent::__construct($shift, Shift::query());
     }
 
-    public function list(array $queryData)
+    public function listAll($queryData)
     {
-        $query = $this->shift->with("Room");
+        $query = auth()->user()->Shifts();
         $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["orderBy"]);
-        return $this->applyPaginate($query, $queryData["pageSize"]);
+        $this->applyOrderBy($query, $queryData["sort"]);
+        return $query->get();
     }
 
-    public function clientList(array $queryData)
+
+    public function listAllowed(array $queryData)
     {
-        $query = $this->getQuery()
+        $this->query = $this->getQuery()
             ->active()
             ->with([
-                "Room" => function ($q) {
-                    $q->select("id", "name", "department_id")
-                        ->with([
-                            "Department" => function ($qu) {
-                                $qu->select("name", "id");
-                            }
-                        ]);
-                },
+                "Room.Department:name,id",
                 "ClientRequests" => function ($q) {
                     $q->whereHas("User", function ($qu) {
                         $qu->where("id", auth()->user()->id);
-                    })->with(["RevisableBy" => function ($qu) {
-                        $qu->select(["name", "id"]);
-                    }]);
+                    })->with(["RevisableBy:name,id", "Requestable"]);
                 }])
             ->withCount([
                 "ClientRequests" => function ($q) {
                     $q->where("user_id", auth()->user()->id);
-                }]);
-        $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["orderBy"]);
-        return $this->applyPaginate($query, $queryData["pageSize"]);
+                }, "Works"]);
+        return $this->list($queryData);
     }
 
-    public function create(array $shiftData)
+    public function create(array $data)
     {
-        $shift = new $this->shift($shiftData);
-        $shift->date = Carbon::parse($shiftData["date"]);
-        $shift->Room()->associate($shiftData["room"]["id"]);
+        $shift = new $this->model($data);
+        $shift->date = Carbon::parse($data["date"]);
+        $shift->Room()->associate($data["room"]["id"]);
         $shift->save();
-        $this->createOrUpdateAttendances($shift, $shiftData["related"]);
+        if ($shift->type !== "open")
+            $this->createWork($shift, $data["related"]["id"]);
         return $shift;
 
     }
@@ -83,48 +76,31 @@ class ShiftRepository implements ShiftRepositoryInterface
     {
         $shift->Room()->associate($shiftNewData["room"]["id"]);
         $shift->update($shiftNewData);
-        $this->createOrUpdateAttendances($shift, $shiftNewData["related"]);
+        if ($shift->type !== "open")
+            $this->createWork($shift, $shiftNewData["related"]["id"]);
         return $shift;
     }
 
     public function delete(Shift $shift): bool
     {
-        if ($shift->Works()->started()->count() < 1) {
-            return $shift->Works()->delete() && $shift->delete();
+        if (Carbon::parse($shift->date . " " . $shift->started_at)->getTimestamp() - Carbon::now()->getTimestamp() > 0) {
+            $shift->ClientRequests()->delete();
+            $shift->Works()->delete();
+            return $shift->delete();
         }
         return false;
-    }
-
-    private function createOrUpdateAttendances(Shift $shift, array $attendances)
-    {
-        $shift->Attendances()->delete();
-        $shift->Works()->delete();
-        if ($shift->type == "open") {
-            foreach ($attendances as $attendance) {
-                $newAttendance = new Attendance();
-                $newAttendance->Shift()->associate($shift);
-                $newAttendance->attendable()->associate($attendance["class"]::find($attendance["id"]));
-                $newAttendance->save();
-            }
-        } else {
-            $attendance = new Attendance();
-            $attendance->Shift()->associate($shift);
-            $attendance->attendable()->associate($attendances["class"]::find($attendances["id"]));
-            $attendance->save();
-            $this->createWork($shift, $attendances["id"]);
-        }
     }
 
     public function requestsList(Shift $shift, array $queryData)
     {
         $query = $shift->ClientRequests();
         $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["orderBy"] ?? ["field" => "id", "sort" => "asc"]);
+        $this->applyOrderBy($query, $queryData["sort"] ?? ["field" => "id", "sort" => "asc"]);
         $shifts = $query->get();
         return $this->prepareRequests($shifts, $queryData["filters"]["date"]);
     }
 
-    private function applyFilters($query, $filters)
+    protected function applyFilters($query, $filters)
     {
         if (isset($filters["date"])) {
             $query->whereBetween("date", $filters["date"]);
@@ -132,40 +108,44 @@ class ShiftRepository implements ShiftRepositoryInterface
         if (isset($filters["type"])) {
             $query->where("type", $filters["type"]);
         }
-    }
-
-    private function applyOrderBy($query, $orderBy)
-    {
-        $query->orderBy($orderBy["field"], $orderBy["sort"]);
-    }
-
-    private function applyPaginate($query, $pageSize)
-    {
-        return $query->paginate($pageSize);
+        return $query;
     }
 
     public function findById($id)
     {
-        return $this->shift->find($id);
+        return $this->query->find($id);
     }
 
     public function getQuery()
     {
-        return $this->shift->where(function ($query) {
-            $query->whereHas("Roles", function ($q) {
-                $q->whereIn("roles.id", auth()->user()->roles()->select("id"));
-            })->orWhereHas("Users", function ($q) {
-                $q->where("users.id", auth()->user()->id);
-            });
+        $roomIds = Permission::where("name", "like", "client.Department.%")->get(["name"])->pluck(["name"])->map(fn($name) => (int)last(explode(".", $name)));
+        return $this->query->whereHas("Room", function ($q) use ($roomIds) {
+            $q->whereIn("id", $roomIds);
         });
     }
 
     private function createWork(Shift $shift, $userId)
     {
-        $work = new Work(["accepted" => true]);
-        $work->Shift()->associate($shift);
-        $work->User()->associate($userId);
-        $work->save();
+        $this->workRepository->create([
+            "user_id" => $userId,
+            "shift_id" => $shift->id,
+            "accepted" => true
+        ]);
     }
 
+    public function changeUser(Shift $shift, ClientRequest $clientRequest)
+    {
+        $baseRequest = $shift->ClientRequests()->where("type", "changeUser")->where("revisable_by_id", $clientRequest->user_id)->first();
+        $work = $shift->Works()->where("user_id", $baseRequest->user_id)->first();
+        $this->workRepository->changeUser($work, $clientRequest->user_id);
+    }
+
+    public function acceptOpenShift(Shift $shift, ClientRequest $clientRequest)
+    {
+        $this->workRepository->create([
+            "user_id" => $clientRequest->user_id,
+            "shift_id" => $shift->id,
+            "accepted" => true
+        ]);
+    }
 }

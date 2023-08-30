@@ -3,160 +3,176 @@
 namespace App\Repositories;
 
 use App\Interfaces\ClientRequestRepositoryInterface;
-use App\Models\Attendance;
+use App\Interfaces\LeaveRepositoryInterface;
+use App\Interfaces\PermissionRepositoryInterface;
+use App\Interfaces\ShiftRepositoryInterface;
+use App\Interfaces\UserRepositoryInterface;
+use App\Interfaces\WorkRepositoryInterface;
 use App\Models\ClientRequest;
-use App\Models\Room;
-use App\Models\Shift;
+use App\Models\Role;
 use App\Models\User;
-use Carbon\Carbon;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
-class ClientRequestRepository implements ClientRequestRepositoryInterface
+class ClientRequestRepository extends BaseRepository implements ClientRequestRepositoryInterface
 {
 
-    private ClientRequest $clientRequest;
+    private PermissionRepositoryInterface $permissionRepository;
+    private UserRepositoryInterface $userRepository;
+    private ShiftRepositoryInterface $shiftRepository;
+    private LeaveRepositoryInterface $leaveRepository;
 
-    public function __construct(ClientRequest $clientRequest)
+    public function __construct(ClientRequest $clientRequest,
+                                PermissionRepositoryInterface $permissionRepository,
+                                UserRepositoryInterface $userRepository,
+                                ShiftRepositoryInterface $shiftRepository, LeaveRepositoryInterface $leaveRepository)
     {
-
-        $this->clientRequest = $clientRequest;
+        $this->permissionRepository = $permissionRepository;
+        $this->leaveRepository = $leaveRepository;
+        $this->userRepository = $userRepository;
+        $this->shiftRepository = $shiftRepository;
+        $this->query = $clientRequest->with([
+            'requestable',
+            'revisableBy:id,name',
+            'user:id,name',
+        ]);
+        parent::__construct($clientRequest, $this->query);
     }
-
-    public function list(array $queryData)
-    {
-        $query = $this->clientRequest->with(["requestable", "user" => function ($q) {
-            $q->select("id", "name");
-        }],);
-        $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["orderBy"]);
-        return $this->applyPaginate($query, $queryData["pageSize"]);
-    }
-
 
     public function create(array $clientRequestData)
     {
-        $clientRequest = new $this->clientRequest($clientRequestData);
-        $clientRequest->User()->associate(auth()->user()->id);
+
+        $clientRequest = $this->model->fill($clientRequestData);
+        $clientRequest->user()->associate(auth()->user()->id);
         $this->setRelation($clientRequest, $clientRequestData);
         $clientRequest->save();
         return $clientRequest;
-
     }
 
-    public function show(ClientRequest $clientRequest)
+    public function show($id)
     {
-        $clientRequest->load(["Room" => function ($q) {
-            $q->select(["id", "name"]);
-        }, "Attendances" => function ($q) {
-            $q->with(["attendable" => function ($query) {
-                $query->select("name", "id");
-            }]);
-        }]);
-        return $clientRequest;
+        return $this->query->with(["requestable", "requestable.room:id,name"])->find($id);
     }
 
     public function edit(ClientRequest $clientRequest, $clientRequestNewData)
     {
-        $clientRequest->Room()->associate($clientRequestNewData["room"]["id"]);
-        $clientRequest->update($clientRequestNewData);
-        $this->createOrUpdateAttendances($clientRequest, $clientRequestNewData["related"]);
+        $clientRequest->fill($clientRequestNewData);
+        $this->setRelation($clientRequest, $clientRequestNewData);
+        if ($clientRequest->isDirty())
+            $clientRequest->update();
         return $clientRequest;
     }
 
     public function delete(ClientRequest $clientRequest): bool
     {
-        if ($clientRequest->Works()->count() < 1) {
+        if ($clientRequest->status == "waiting") {
             return $clientRequest->delete();
         }
         return false;
     }
 
-    private function createOrUpdateAttendances(ClientRequest $clientRequest, array $attendances)
-    {
-        $clientRequest->Attendances()->delete();
-        if ($clientRequest->type == "open") {
-            foreach ($attendances as $attendance) {
-                $newAttendance = new Attendance();
-                $newAttendance->ClientRequest()->associate($clientRequest);
-                $newAttendance->attendable()->associate($attendance["class"]::find($attendance["id"]));
-                $newAttendance->save();
-            }
-        } else {
-            $attendance = new Attendance();
-            $attendance->ClientRequest()->associate($clientRequest);
-            $attendance->attendable()->associate($attendances["class"]::find($attendances["id"]));
-            $attendance->save();
-        }
-    }
 
-    public function requestsList(ClientRequest $clientRequest, array $queryData)
+    protected function applyFilters($query, $filters)
     {
-        $query = $clientRequest->Requests();
-        $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["orderBy"] ?? ["field" => "started_at", "sort" => "asc"]);
-        $clientRequests = $query->get();
-        return $this->prepareRequests($clientRequests, $queryData["filters"]["date"]);
-    }
-
-    private function applyFilters($query, $filters)
-    {
-        if (isset($filters["search"])) {
-            $query->where("name", "like", "%" . $filters["search"] . "%");
-        }
+        if (isset($filters["type"]) && $filters["type"] === "revised") {
+            $query->where("revisable_by_id", auth()->user()->id)->where("type", "changeUser");
+        } else if (isset($filters["type"])) {
+            $query->where("user_id", auth()->user()->id)->where("type", $filters["type"]);
+        } else
+            $query->where("user_id", auth()->user()->id);
         if (isset($filters["date"])) {
-            $query->whereBetween("started_at", $filters["date"]);
+            $query->whereBetween("created_at", $filters["date"]);
         }
-    }
-
-    private function applyOrderBy($query, $orderBy)
-    {
-        $query->orderBy($orderBy["field"], $orderBy["sort"]);
-    }
-
-    private function applyPaginate($query, $pageSize)
-    {
-        return $query->paginate($pageSize);
-    }
-
-    public function findById($id)
-    {
-        return $this->clientRequest->find($id);
-    }
-
-    private function storeManagers(ClientRequest $clientRequest, array $users)
-    {
-        $permission = Permission::findByName("admin.Department.$clientRequest->department_id.ClientRequest.$clientRequest->id");
-        $permission->Users()->sync(collect($users)->pluck("id")->toArray());
-    }
-
-    public function getQuery()
-    {
-        return $this->clientRequest->where(function ($query) {
-            $query->whereHas("Roles", function ($q) {
-                $q->whereIn("roles.id", auth()->user()->roles()->select("id"));
-            })->orWhereHas("Users", function ($q) {
-                $q->whereId(auth()->user()->id);
-            });
-        });
+        return $query;
     }
 
     private function setRelation(ClientRequest $clientRequest, array $clientRequestData)
     {
-        switch ($clientRequest->type) {
+        $type = $clientRequest->type;
+        switch ($type) {
             case "changeUser":
-                $clientRequest->requestable()->associate(Shift::find($clientRequestData["shift"]["id"]));
-                $user = User::find($clientRequestData["changeUser"]["id"]);
-                $clientRequest->RevisableBy()->associate($user);
-                return;
-            case "openShift":
-                $clientRequest->requestable()->associate(Shift::find($clientRequestData["shift"]["id"]));
-                $room = Room::find($clientRequestData["shift"]["room"]["id"]);
-                $clientRequest->RevisableBy()->associate(Role::findByName("admin.Department.$room->department_id.Room.$room->id"));
-                return;
-            case "takeLeave";
+                $this->setChangeUserRelation($clientRequest, $clientRequestData);
+                break;
+            case "shift":
+                $this->setShiftRelation($clientRequest, $clientRequestData);
                 break;
         }
     }
 
+    private function setChangeUserRelation(ClientRequest $clientRequest, array $clientRequestData)
+    {
+        $shift = $this->shiftRepository->findById($clientRequestData["requestable"]["id"]);
+        $user = $this->userRepository->findById($clientRequestData["revisable_by"]["id"]);
+        $clientRequest->requestable()->associate($shift);
+        $clientRequest->revisableBy()->associate($user);
+    }
+
+    private function setShiftRelation(ClientRequest $clientRequest, array $clientRequestData)
+    {
+        $shift = $this->shiftRepository->findById($clientRequestData["requestable"]["id"]);
+        $clientRequest->requestable()->associate($shift);
+        $clientRequest->revisableBy()->associate(null);
+    }
+
+    public function cancel(ClientRequest $clientRequest)
+    {
+        if ($clientRequest->status == "waiting")
+            $clientRequest->update(["status" => "canceled"]);
+        return $clientRequest;
+    }
+
+    public function confirm(ClientRequest $clientRequest)
+    {
+        $clientRequest->status = "accepted";
+        $oldUser = $clientRequest->User->name;
+        $clientRequest->save();
+        $newClientRequest = $this->model->fill([
+            "type" => "changeUser",
+            "message" => "تغییر شیفت از کاربر $oldUser"
+        ]);
+        $newClientRequest->User()->associate(auth()->user());
+        $newClientRequest->Requestable()->associate($clientRequest->Requestable);
+        $newClientRequest->save();
+    }
+
+    public function adminReject(ClientRequest $clientRequest, $requestDetails)
+    {
+        $clientRequest->RevisableBy()->associate(auth()->user());
+        $clientRequest->status = "rejected";
+        $clientRequest->comment = $requestDetails["comment"] ?? "";
+        $clientRequest->save();
+        if ($clientRequest->type === "takeLeave")
+            $this->leaveRepository->reject($clientRequest->Requestable);
+        if ($clientRequest->type === "changeUser")
+            $clientRequest->Requestable->ClientRequests()->where("revisable_by_id", $clientRequest->user_id)->first()->update(["comment" => $requestDetails["comment"] ?? "درخواست از طرف مدیر لغو شد", "status" => "rejected"]);
+
+    }
+
+    public function reject(ClientRequest $clientRequest, $requestDetails)
+    {
+        $clientRequest->status = "rejected";
+        $clientRequest->comment = $requestDetails["comment"] ?? "";
+        $clientRequest->save();
+
+    }
+
+    public function adminConfirm(ClientRequest $clientRequest)
+    {
+        $clientRequest->RevisableBy()->associate(auth()->user());
+        $clientRequest->status = "accepted";
+        $clientRequest->save();
+
+        switch ($clientRequest->type) {
+            case "changeUser":
+                $this->shiftRepository->changeUser($clientRequest->Requestable, $clientRequest);
+                break;
+            case "takeLeave":
+                $this->leaveRepository->accept($clientRequest->Requestable);
+                break;
+            case "shift":
+                $this->shiftRepository->acceptOpenShift($clientRequest->Requestable, $clientRequest);
+                break;
+        }
+
+
+    }
 }

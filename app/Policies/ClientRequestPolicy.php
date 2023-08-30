@@ -7,6 +7,7 @@ use App\Models\Room;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Gate;
 
 class ClientRequestPolicy
 {
@@ -99,5 +100,26 @@ class ClientRequestPolicy
     public function forceDelete(User $user, ClientRequest $clientRequest)
     {
         //
+    }
+
+    public function reject(User $user, ClientRequest $clientRequest)
+    {
+        if ($clientRequest->type === "takeLeave")
+            return $user->can("admin.users.leaves");
+        else {
+            $room = $clientRequest->requestable->Room;
+            return $user->can("admin.Department.$room->department_id.Room.$room->id");
+        }
+    }
+
+    public function confirm(User $user, ClientRequest $clientRequest)
+    {
+        if ($clientRequest->type === "takeLeave")
+            return $user->can("admin.users.leaves");
+        else {
+            $room = $clientRequest->requestable->Room;
+            return $user->can("admin.Department.$room->department_id.Room.$room->id");
+        }
+
     }
 }

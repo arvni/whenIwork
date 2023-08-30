@@ -1,0 +1,10 @@
+@import 'react-big-calendar/lib/sass/styles';
+@import 'react-big-calendar/lib/addons/dragAndDrop/styles'; // if using DnD
+*{
+    font-family: "YekanBakh", serif;
+}
+.rbc-day-slot{
+    .rbc-events-container{
+     margin-right: 0;
+    }
+}

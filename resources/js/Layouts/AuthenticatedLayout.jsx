@@ -29,6 +29,7 @@ import Loading from "@/Components/Loading";
 import {Inertia} from "@inertiajs/inertia";
 import ChangePasswordForm from "@/Components/ChangePasswordForm";
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 
 InertiaProgress.init({
     // The delay after which the progress bar will
@@ -62,8 +63,8 @@ const cacheRtl = createCache({
 });
 
 
-export default function Authenticated({auth, breadcrumbs, children}) {
-    const {post, data, setData,reset} = useForm();
+export default function Authenticated({auth, breadcrumbs, children,routes}) {
+    const {post, data, setData, reset} = useForm();
     const [loading, setLoading] = useState(false);
     const [openChangePassword, setOpenChangePassword] = useState(false);
     const handleVisit = (href, method = "get") => () => {
@@ -72,41 +73,6 @@ export default function Authenticated({auth, breadcrumbs, children}) {
         else
             Inertia.visit(route(href));
     };
-    const routes = [
-        {
-            title: "داشبورد",
-            href: 'dashboard',
-            icon: <DashboardIcon/>,
-        },
-        {
-            title: "دپارتمانها",
-            href: 'admin.departments.index',
-            icon: <BusinessSharp/>,
-            permission: "admin.departments.index"
-        },
-        {
-            title: "بخش ها",
-            href: 'admin.rooms.index',
-            icon: <Room/>,
-        },
-        {
-            title: "لیست کاربران",
-            href: "admin.users.index",
-            permission: "admin.users.index",
-            icon: <GroupsIcon/>,
-        },
-        {
-            title: "نقش ها",
-            href: "admin.roles.index",
-            permission: "admin.roles.index",
-            icon: <ManageAccountsIcon/>
-        },
-        {
-            title: "شیفت ها",
-            href: "client.shifts.index",
-            icon: <PendingActionsIcon/>
-        },
-    ]
     useEffect(() => {
         document.addEventListener('inertia:start', function () {
             setLoading(true);

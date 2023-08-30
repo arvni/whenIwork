@@ -14,6 +14,7 @@ return new class extends Migration {
     {
         Schema::create('client_requests', function (Blueprint $table) {
             $table->id();
+            $table->nullableMorphs("revisable_by");
             $table->nullableMorphs("requestable");
             $table->foreignIdFor(\App\Models\User::class)->references("id")->on("users")->cascadeOnDelete();
             $table->enum("type", ["shift", "changeUser", "takeLeave"]);

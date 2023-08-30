@@ -46,19 +46,30 @@ class Shift extends Model
     {
         return $this->morphToMany(\Spatie\Permission\Models\Role::class, "attendable", "attendances", "shift_id", "attendable_id", null, null, true);
     }
+
     public function Users()
     {
-        return $this->morphToMany(User::class, "attendable", "attendances", "shift_id", "attendable_id", null, null, true);
+        return $this->hasManyThrough(User::class, Work::class);
     }
 
     public function scopeActive($query)
     {
-        return $query->where("isActive",true);
+        return $query->where("isActive", true);
     }
 
     public function ClientRequests()
     {
-        return $this->morphMany(ClientRequest::class,"requestable");
+        return $this->morphMany(ClientRequest::class, "requestable");
+    }
+
+    public function AcceptedClientRequests()
+    {
+        return $this->morphMany(ClientRequest::class, "requestable")->accepted();
+    }
+
+    public function WaitingClientRequests()
+    {
+        return $this->morphMany(ClientRequest::class, "requestable")->waiting();
     }
 
 }

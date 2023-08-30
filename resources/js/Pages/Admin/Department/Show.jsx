@@ -1,12 +1,10 @@
-import {useEffect, useState} from "react";
+import { useState} from "react";
 import {Head, useForm, usePage} from "@inertiajs/inertia-react";
 
 import {GridActionsCellItem} from "@mui/x-data-grid";
 import {Edit as EditIcon, Delete as DeleteIcon, RemoveRedEye} from "@mui/icons-material";
 
-import q2o from "@/Services/querystringToObject";
 
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import TableLayout from "@/Layouts/TableLayout";
 
 import DeleteForm from "@/Components/DeleteForm";
@@ -16,10 +14,11 @@ import AddForm from "@/Pages/Admin/Room/Components/Form";
 import {fetchData} from "@/Services/fetchData";
 import {Inertia} from "@inertiajs/inertia";
 import Loading from "@/Components/Loading";
+import AdminLayout from "@/Layouts/AdminLayout";
 
 const Index = () => {
     const {department, status, errors, defaultValues} = usePage().props;
-    const {post, data, setData, reset, processing, get, wasSuccessful} = useForm();
+    const {post, data, setData, reset, processing} = useForm();
     const columns = [
         {
             field: 'name',
@@ -135,7 +134,7 @@ const breadCrumbs = [
         icon: null
     }
 ]
-Index.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={[...breadCrumbs, {
+Index.layout = page => <AdminLayout auth={page.props.auth} children={page} breadcrumbs={[...breadCrumbs, {
     title: `دپارتمان ${page.props.department.name}`,
     link: null,
     icon: null

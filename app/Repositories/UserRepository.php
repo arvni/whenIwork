@@ -6,7 +6,7 @@ use App\Interfaces\UserRepositoryInterface;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-class UserRepository implements UserRepositoryInterface
+class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
 
     private User $user;
@@ -14,14 +14,7 @@ class UserRepository implements UserRepositoryInterface
     public function __construct(User $user)
     {
         $this->user = $user;
-    }
-
-    public function list(array $queryData)
-    {
-        $query = $this->user->with("Roles");
-        $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["orderBy"]);
-        return $this->applyPaginate($query, $queryData["pageSize"]);
+        parent::__construct($user, User::query()->with("roles"));
     }
 
     public function create(array $userData)
@@ -44,7 +37,7 @@ class UserRepository implements UserRepositoryInterface
     public function edit(User $user, $userNewData)
     {
         $user->update($userNewData);
-        $user->syncRoles($userNewData["role"]["id"]);
+        $user->syncRoles(collect($userNewData["roles"])->pluck("id")->toArray());
     }
 
     public function delete(User $user)
@@ -52,7 +45,7 @@ class UserRepository implements UserRepositoryInterface
         // TODO: Implement delete() method.
     }
 
-    private function applyFilters($query, $filters)
+    protected function applyFilters($query, $filters)
     {
         if (isset($filters["search"])) {
             $query->where("name", "like", "%" . $filters["search"] . "%")
@@ -60,14 +53,15 @@ class UserRepository implements UserRepositoryInterface
         }
         if (isset($filters["role"]) && $filters["role"])
             $query->role($filters["role"]["id"]);
+        return $query;
     }
 
-    private function applyOrderBy($query, $orderBy)
+    protected function applyOrderBy($query, $orderBy)
     {
-        $query->orderBy($orderBy["field"], $orderBy["sort"]);
+        return $query->orderBy($orderBy["field"], $orderBy["sort"]);
     }
 
-    private function applyPaginate($query, $pageSize)
+    protected function applyPaginate($query, $pageSize)
     {
         return $query->paginate($pageSize);
     }

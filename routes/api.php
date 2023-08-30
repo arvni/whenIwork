@@ -33,5 +33,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/files/{document}', [FileController::class, 'download'])->name('files.download');
     Route::get("rooms/{room}/users", [\App\Http\Controllers\Api\RoomController::class, "listUsers"])->name("client.roomsApi.users");
     Route::get("rooms/{room}/roles", [\App\Http\Controllers\Api\RoomController::class, "listRoles"])->name("client.roomsApi.roles");
+    Route::get("client-requests/{clientRequests}", [\App\Http\Controllers\Api\ClientRequestController::class, "show"])->name("clientRequestsApi.show");
     Route::get("rooms", RoomListController::class)->name("roomsApi.index");
 });

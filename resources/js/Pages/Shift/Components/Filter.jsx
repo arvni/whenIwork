@@ -5,15 +5,13 @@ import SelectSearch from "@/Components/SelectSearch";
 
 const Filter = ({defaultFilter, onFilter}) => {
     const [filter, setFilter] = useState(defaultFilter);
-    const handleChange = (e) => {
-        setFilter(prevState => ({...prevState, room: e.target.value}));
-    };
+    const handleChange = (e) => setFilter(prevState => ({...prevState, room: e.target.value}));
     const handleTypeChange = (_, v) => {
         setFilter(prevState => ({...prevState, type: v}));
         onFilter({...filter, type: v})();
     }
     return (<>
-            <Tabs onChange={handleTypeChange} value={filter?.type} sx={{marginBottom: "1rem"}} centered
+            <Tabs onChange={handleTypeChange} value={filter?.type ?? "open"} sx={{marginBottom: "1rem"}} centered
                   title={"نوع شیفت"}>
                 <Tab value={"open"} label={<Typography fontWeight={800}>آزاد</Typography>}/>
                 <Tab value={"normal"} label={<Typography fontWeight={800}>عادی</Typography>}/>

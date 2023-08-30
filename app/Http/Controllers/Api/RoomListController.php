@@ -25,7 +25,7 @@ class RoomListController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $rooms=$this->roomRepository->list($request->all(),"client");
+        $rooms=$this->roomRepository->listAllowed($request->all());
         return APIResource::collection($rooms);
     }
 }
