@@ -25,7 +25,9 @@ class RoleRepository implements RoleRepositoryInterface
 
     public function create(array $roleData)
     {
-        return $this->role->create($roleData);
+        $role=$this->role->create($roleData);
+        $role->syncPermissions($roleData["permissions"]);
+        return $role;
     }
 
     public function show(Role $role)
