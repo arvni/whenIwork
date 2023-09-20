@@ -41,7 +41,7 @@ const UserForm = ({values, setValues, cancel, loading, submit, errors, edit}) =>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                     <SelectSearch multiple url={route("admin.roleApi.index")} error={Object.keys(errors).includes('roles')}
-                                  helperText={errors?.roles ?? ""} value={values.roles} onChange={handleChange}
+                                  helperText={errors?.roles ?? ""} value={values.roles} onChange={handleChange} label={"نقش ها"}
                                   name={"roles"}/>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>

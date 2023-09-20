@@ -19,7 +19,8 @@ const SelectSearch = forwardRef(({
     const [options, setOptions] = useState([]);
     const [search, setSearch] = useState("");
     useEffect(() => {
-        listOptions();
+        if (search)
+            listOptions();
     }, [search]);
     const handleSearch = (e) => setSearch(e ? e.target.value ?? "" : "");
     const listOptions = async () => {

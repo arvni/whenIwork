@@ -11,7 +11,7 @@ const Add = (props) => {
         mobile: "",
         email: "",
         avatar: "",
-        role: [],
+        roles: [],
         password: "",
         password_confirmation: ""
     });
