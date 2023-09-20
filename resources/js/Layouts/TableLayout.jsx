@@ -18,8 +18,8 @@ const TableLayout = ({
                          ExpandedComponent = null,
                          expandedKey
                      }) => {
-    const handlePageSizeChange =e=> reload(1, defaultValues.filters, defaultValues.sort[0], e.target.value);
-    const handlePageChange = (p) => reload(p + 1, defaultValues.filters, defaultValues.sort[0], defaultValues.pageSize);
+    const handlePageSizeChange = e => reload(1, defaultValues.filters, defaultValues.sort[0], e.target.value);
+    const handlePageChange = (_, p) => reload(p + 1, defaultValues.filters, defaultValues.sort[0], defaultValues.pageSize);
     const handleFilterChange = (filter) => () => reload(1, filter, defaultValues.sort[0], defaultValues.pageSize);
     const handleSortChange = (sortModel) => reload(1, defaultValues.filters, sortModel, defaultValues.pageSize)
     return (
@@ -47,7 +47,7 @@ const TableLayout = ({
                            }
                        }}
                        sortModel={defaultValues.sort}
-                       rowsPerPageOptions={[100,50 ,20, 10]}
+                       rowsPerPageOptions={[100, 50, 20, 10]}
                        pageSize={defaultValues.pageSize * 1}
                        onPageSizeChange={handlePageSizeChange}
                        onPageChange={handlePageChange}
