@@ -220,7 +220,7 @@ const Index = () => {
 
     return (
         <>
-            <Head title={"لیست درخواست ها"}/>
+            <Head title={"لیست درخواست ها"} />
             <TableLayout defaultValues={defaultValues} success={success} status={status} reload={pageReload}
                          columns={columns} data={clientRequests} rowHeight={100}
                          addNew={defaultValues?.filters?.type === "takeLeave"}
