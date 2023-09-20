@@ -5,6 +5,7 @@ namespace App\Interfaces;
 
 
 use App\Models\Leave;
+use App\Models\User;
 
 interface LeaveRepositoryInterface extends RepositoryInterface
 {
@@ -20,7 +21,7 @@ interface LeaveRepositoryInterface extends RepositoryInterface
 
     public function delete(Leave $leave);
 
-    public function requestsList(Leave $leave,array $queryData);
+    public function requestsList(Leave $leave, array $queryData);
 
     public function findById($id);
 

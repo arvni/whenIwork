@@ -45,13 +45,11 @@ class ClientRequestPolicy
      */
     public function create(User $user, Room $room)
     {
-        if ($user->hasAnyPermission([
-            "client.Department.$room->department_id.Room.$room->id",
-            "admin.Department.$room->department_id.Room.$room->id",
-            "admin.Department.$room->department_id",
-        ]))
-            return true;
-        return false;
+            return $user->hasAnyPermission([
+                "client.Department.$room->department_id.Room.$room->id",
+                "admin.Department.$room->department_id.Room.$room->id",
+                "admin.Department.$room->department_id",
+            ]);
     }
 
     /**

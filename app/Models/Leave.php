@@ -12,7 +12,8 @@ class Leave extends Model
     protected $fillable = [
         "started_at",
         "ended_at",
-        "type"
+        "type",
+        "status"
     ];
 
     public function User()
@@ -23,6 +24,21 @@ class Leave extends Model
     public function Acceptor()
     {
         return $this->belongsTo(User::class, "acceptor_id");
+    }
+
+    public function Room()
+    {
+        return $this->belongsTo(Room::class, "id");
+    }
+
+    public function scopeStatus($query, $statuses)
+    {
+        return $query->whereIn("status", $statuses);
+    }
+
+    public function scopeAccepted($query)
+    {
+        return $query->status(["accepted"]);
     }
 
 }

@@ -44,4 +44,5 @@ class Work extends Model
     {
         return $query->where("accepted",true);
     }
+
 }

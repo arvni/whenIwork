@@ -22,4 +22,14 @@ class Role extends SpatieRole
     {
         return parent::permissions();
     }
+
+    public function scopeSearch($query, $search)
+    {
+        return $query->where("name", "like", "%$search%");
+    }
+
+    public function Shifts()
+    {
+        return $this->belongsToMany(Shift::class, "role_shift");
+    }
 }

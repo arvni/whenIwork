@@ -15,6 +15,8 @@ class ClientRequest extends Model
         "status"
     ];
 
+    // Relations
+
     public function requestable()
     {
         return $this->morphTo();
@@ -22,7 +24,7 @@ class ClientRequest extends Model
 
     public function RevisableBy()
     {
-        return $this->morphTo();
+        return $this->belongsTo(User::class, "revisable_by_id");
     }
 
     public function User()
@@ -30,9 +32,22 @@ class ClientRequest extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function Shift()
+    {
+        return $this->belongsTo(Shift::class, "requestable_id")->where("requestable_type", Shift::class);
+    }
+
+
+    // Scopes
+
     public function scopeStatus($query, $status)
     {
         return $query->where("status", $status);
+    }
+
+    public function scopeType($query, $type)
+    {
+        return $query->where("type", $type);
     }
 
     public function scopeAccepted($query)
@@ -43,5 +58,10 @@ class ClientRequest extends Model
     public function scopeWaiting($query)
     {
         return $query->status("waiting");
+    }
+
+    public function scopeChangeUser($query)
+    {
+        return $query->type("changeUser");
     }
 }

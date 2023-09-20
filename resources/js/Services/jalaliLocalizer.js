@@ -31,6 +31,7 @@ localizer.visibleDays = (date, localizer) => {
         current = localizer.add(current, 1, "day");
         days.push(current);
     }
+    // console.log(days);
     return days;
 };
 
@@ -52,6 +53,7 @@ localizer.neq = (currentDate, date, unit) => {
 let eq = localizer.eq;
 
 localizer.eq = (currentDate, date, unit) => {
+    console.log(currentDate,date);
     if (unit !== "month") return eq(currentDate, date, unit);
     else if (date) {
         const cmd = jmoment.from(currentDate.toDateString());

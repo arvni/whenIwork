@@ -9,7 +9,10 @@ use App\Http\Requests\UserRequest;
 use App\Http\Requests\UsersIndexRequest;
 use App\Interfaces\UserRepositoryInterface;
 use App\Models\User;
+use App\Services\CalculateUserHours;
+use App\Services\CalendarService;
 use App\Utils\FileAction;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,11 +20,15 @@ use Inertia\Response;
 class UserController extends Controller
 {
     private UserRepositoryInterface $userRepository;
+    private CalendarService $calendarService;
+    private CalculateUserHours $calculateUserHours;
 
-    public function __construct(UserRepositoryInterface $userRepository)
+    public function __construct(UserRepositoryInterface $userRepository, CalendarService $calendarService, CalculateUserHours $calculateUserHours)
     {
         $this->userRepository = $userRepository;
-        $this->middleware("indexProvider")->only("index");
+        $this->calendarService = $calendarService;
+        $this->calculateUserHours = $calculateUserHours;
+        $this->middleware("indexProvider")->only(["index", "show"]);
     }
 
     /**
@@ -32,7 +39,7 @@ class UserController extends Controller
      */
     public function index(UsersIndexRequest $request): Response
     {
-        $defaultValues =$request->all();
+        $defaultValues = $request->all();
         $users = $this->userRepository->list($defaultValues);
         return Inertia::render('Admin/User/Index', compact("users", "defaultValues"));
     }
@@ -71,6 +78,18 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')->with(["status" => "$user->name Successfully Added", "success" => true]);
 
+    }
+
+    public function show(User $user, Request $request)
+    {
+        $user = $this->userRepository->show($user);
+        $defaultValues = $request->all();
+        $shifts = $this->calendarService->listShifts($request->get("date", null), $user->id);
+        $leaves = $this->calendarService->listLeaves($request->get("date", null), $user->id);
+        $sumShifts = $this->calculateUserHours->calculateSumOfShiftsHours($user->id, $request->get("date", null));
+        $sumLeaves = $this->calculateUserHours->calculateSumOfLeavesHours($user->id, $request->get("date", null));
+        $events = array_merge($shifts, $leaves);
+        return Inertia::render("Admin/User/Show", compact("user", "defaultValues", "events", "sumShifts", "sumLeaves"));
     }
 
     /**

@@ -18,7 +18,8 @@ import ClientLayout from "@/Layouts/ClientLayout";
 const Index = ({shifts, defaultValues}) => {
     const {post, processing, data, setData, reset} = useForm({});
     const [open, setOpen] = useState(false);
-    const pageReload = (page, filters, sort, pageSize) => Inertia.visit(route("client.shifts.index"), {
+    const pageReload = (page, filters, sort, pageSize) => {
+        Inertia.visit(route("client.shifts.index"), {
             data: {
                 filters,
                 sort,
@@ -28,6 +29,7 @@ const Index = ({shifts, defaultValues}) => {
             only: ["shifts", "defaultValues"],
             preserveState: true
         });
+    }
     const columns = [
         {
             field: 'rooms.name',
@@ -67,11 +69,10 @@ const Index = ({shifts, defaultValues}) => {
                                                  icon={<AssignmentTurnedInIcon color={"info"}/>} label="درخواست شیفت"
                                                  onClick={handleOpenRequest(params.row, "shift")}/>
                         );
-                    else
-                        !params.row.client_requests_count && cols.push(<GridActionsCellItem
-                            key={`change-${params.row.id}`}
-                            icon={<ChangeCircleIcon color={"warning"}/>} label="تغییر شیفت"
-                            onClick={handleOpenRequest(params.row, "changeUser")}/>)
+                    params.row.works_count && !params.row.client_requests_count && cols.push(<GridActionsCellItem
+                        key={`change-${params.row.id}`}
+                        icon={<ChangeCircleIcon color={"warning"}/>} label="تغییر شیفت"
+                        onClick={handleOpenRequest(params.row, "changeUser")}/>)
                 }
                 return cols;
             }
@@ -89,11 +90,20 @@ const Index = ({shifts, defaultValues}) => {
         setData({requestable: params, type});
         setOpen(true);
     }
-    const handleSubmit = () => post(route("client.clientRequests.store"), {onSuccess: handleCloseRequest});
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        post(route("client.clientRequests.store"), {
+            onSuccess: () => {
+                handleCloseRequest();
+                pageReload(defaultValues.page, defaultValues.filters, defaultValues.sort, defaultValues.pageSize);
+            },
+            preserveState: true
+        });
+    }
 
-    return <TableLayout loading={processing} reload={pageReload} defaultValues={defaultValues} data={shifts}
-                        columns={columns} Filter={Filter} ExpandedComponent={ExpandedComponent}
-                        expandedKey={"client_requests"}>
+    return <TableLayout loading={processing} ExpandedComponent={ExpandedComponent} expandedKey={"client_requests"}
+                        columns={columns} data={shifts} reload={pageReload} defaultValues={defaultValues}
+                        Filter={Filter}>
         <Head title={"شیفت ها"}/>
         <ClientRequest onSubmit={handleSubmit} onChange={handleChange} clientRequest={data} open={open}
                        onClose={handleCloseRequest}/>

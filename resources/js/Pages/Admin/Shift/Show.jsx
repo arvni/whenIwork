@@ -7,6 +7,7 @@ import ConfirmForm from "@/Pages/Admin/Shift/Components/ConfirmForm";
 import RejectForm from "@/Pages/Admin/Shift/Components/RejectForm";
 import ShiftWorks from "@/Pages/Admin/Shift/Components/ShiftWorks";
 import AdminLayout from "@/Layouts/AdminLayout";
+import {Inertia} from "@inertiajs/inertia";
 
 const Show = ({shift}) => {
 
@@ -46,6 +47,8 @@ const Show = ({shift}) => {
         })
     }
 
+    const showUser=(id)=>Inertia.visit(route("admin.users.show",id));
+
     const handleChange = (key, value) => setData(previousData => ({...previousData, [key]: value}));
     const active = new Date(shift.date + " " + shift.started_at) > new Date() && (shift.client_requests_count <= shift.noUsers || shift.type === "normal");
     return <>
@@ -53,12 +56,12 @@ const Show = ({shift}) => {
         <Divider><Typography component={"h5"}>شیفت #{shift.id}</Typography></Divider>
         <ShiftInformation shift={shift}/>
         <Divider sx={{marginTop: 3}}><Typography component={"h5"}>کاربران</Typography></Divider>
-        <ShiftWorks works={shift.works}/>
+        <ShiftWorks works={shift.works} onUsersClick={showUser}/>
         <Divider sx={{marginTop: 3}}><Typography component={"h5"}>درخواست ها</Typography></Divider>
         <ShiftRequests requests={shift.client_requests}
                        active={active}
                        onConfirm={handleConfirm}
-                       onReject={handleReject}/>
+                       onReject={handleReject} onUsersClick={showUser}/>
         <ConfirmForm onConfirm={confirm} onClose={handleClose} open={openConfirm} request={data}/>
         <RejectForm onChange={handleChange} onSubmit={reject} onClose={handleClose} open={openReject} request={data}/>
     </>;

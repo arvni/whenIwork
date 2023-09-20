@@ -1,8 +1,12 @@
 import {useState} from "react";
 import {useForm, usePage} from "@inertiajs/inertia-react";
 import {
+    Alert,
     Backdrop,
-    CircularProgress, Divider, Stack, Typography
+    CircularProgress,
+    Divider,
+    Stack,
+    Typography
 } from "@mui/material";
 
 import q2o from "@/Services/querystringToObject";
@@ -14,12 +18,14 @@ import DeleteForm from "@/Components/DeleteForm";
 import {Inertia} from "@inertiajs/inertia";
 import DatePickerRange from "@/Components/DateRangePicker";
 import AdminLayout from "@/Layouts/AdminLayout";
+import PublishForm from "@/Pages/Admin/Room/Components/PublishForm";
+import ConfirmForm from "@/Components/ConfirmForm";
 
 
 const Show = () => {
-    const {room, week} = usePage().props;
+    const {room, week, countShifts, futureWeek} = usePage().props;
     const [expanded, setExpanded] = useState(week.days.find(day => day.today)?.date)
-    const {data, setData, post, processing, errors, setError, clearErrors} = useForm({
+    const {data, setData, post, processing, errors, setError, clearErrors, reset} = useForm({
         room: {
             id: room.id,
             name: room.name
@@ -34,15 +40,18 @@ const Show = () => {
     });
     const [waiting, setWaiting] = useState(false);
     const [openDeleteShift, setOpenDeleteShift] = useState(false);
-    const [openAddShift, setOpenAddShift] = useState(false);
+    const [addShiftOpen, setAddShiftOpen] = useState(false);
+    const [openConfirmDuplicate, setOpenConfirmDuplicate] = useState(false);
+    const [publishShiftOpen, setPublishShiftOpen] = useState(false);
     const [filters, setFilters] = useState({date: week["date"], ...q2o()});
+
     const reloadPage = (v) => Inertia.visit(route("admin.rooms.show", room.id), {
         data: {date: v},
-        only: ["week"],
+        only: ["week", "countShifts", "futureWeek"],
         preserveState: true
     });
 
-    const handleDateChange = (name,value) => {
+    const handleDateChange = (name, value) => {
         setFilters({[name]: value});
         reloadPage(value);
     }
@@ -56,10 +65,10 @@ const Show = () => {
         setData(prevState => ({...prevState, date}));
     }
     const handleAddShift = () => {
-        setOpenAddShift(true);
+        setAddShiftOpen(true);
     }
     const closeAddShiftForm = () => {
-        setOpenAddShift(false);
+        setAddShiftOpen(false);
         resetData();
     }
     const handleShow = (id) => e => {
@@ -68,6 +77,19 @@ const Show = () => {
 
     }
 
+    const handlePublish = (id) => () => {
+        setData({id});
+        setPublishShiftOpen(true);
+    }
+    const handlePublishShiftClose = () => {
+        setPublishShiftOpen(false);
+        reset();
+    }
+    const publish = () => {
+        post(route("admin.shifts.publish", data.id), {
+            onSuccess: handlePublishShiftClose
+        });
+    }
     const handleEdit = (id) => () => {
         setWaiting(true);
         fetchData(route("admin.shiftApi.show", id))
@@ -76,7 +98,7 @@ const Show = () => {
                     ...res.data,
                     _method: "put"
                 });
-                setOpenAddShift(true);
+                setAddShiftOpen(true);
             })
             .finally(() => {
                 setWaiting(false);
@@ -110,16 +132,36 @@ const Show = () => {
         noUsers: 1,
         related: "",
         description: ""
-    })
+    });
+
+    const handleDuplicate = (e) => {
+        e.preventDefault();
+        setOpenConfirmDuplicate(true)
+        setData({
+            room: {
+                id: room.id,
+                name: room.name
+            },
+            date: filters.date
+        });
+    }
+    const confirmDuplicate = () => {
+        post(route("admin.rooms.shifts_duplicate", data.room.id), {
+            onSuccess: closeConfirmForm
+        });
+    }
+    const closeConfirmForm = () => {
+        setOpenConfirmDuplicate(false);
+        resetData()
+    }
 
     return (
         <>
-            <Stack
-                width={"100%"}
-                direction={"row"}
-                justifyContent={"space-evenly"}
-                flexWrap={"wrap"}
-                spacing={2}
+            <Stack width={"100%"}
+                   direction={"row"}
+                   justifyContent={"space-evenly"}
+                   flexWrap={"wrap"}
+                   spacing={2}
             >
                 <Typography
                     variant={"h1"}
@@ -127,24 +169,25 @@ const Show = () => {
                 >{room.name}</Typography>
                 <DatePickerRange weekPicker onChange={handleDateChange} value={filters?.date} name={"date"}/>
             </Stack>
+            {!countShifts && futureWeek &&
+            <Alert>برای تکرار شیفت های هفته گذشته <a href="#" onClick={handleDuplicate}>اینجا</a> را کلیک کنید </Alert>}
             <Divider sx={{marginBottom: "1em"}}/>
-            {week.days.map(day =>
-                <DayShiftsContainer
-                    onDelete={handleDelete}
-                    onEdit={handleEdit}
-                    onShow={handleShow}
-                    key={day.date}
-                    day={day}
-                    expanded={expanded === day.date}
-                    onChange={handleDayChange}
-                    onAddClick={handleAddShift}/>)}
+            {week.days.map(day => <DayShiftsContainer onDelete={handleDelete}
+                                                      onEdit={handleEdit}
+                                                      onShow={handleShow}
+                                                      key={day.date}
+                                                      day={day}
+                                                      expanded={expanded === day.date}
+                                                      onChange={handleDayChange}
+                                                      onAddClick={handleAddShift}
+                                                      onPublish={handlePublish}/>)}
             <Backdrop sx={{color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1}}
                       open={waiting}>
                 <CircularProgress color="inherit"/>
             </Backdrop>
             <ShiftForm
                 values={data}
-                open={openAddShift}
+                open={addShiftOpen}
                 errors={errors}
                 setValues={setData}
                 loading={processing}
@@ -156,10 +199,12 @@ const Show = () => {
             />
             <DeleteForm title={data.date} openDelete={openDeleteShift && !processing} disAgreeCB={handleCloseDeleteForm}
                         agreeCB={deleteShift}/>
+            <PublishForm open={publishShiftOpen} onAgree={publish} onClose={handlePublishShiftClose}/>
+            <ConfirmForm open={openConfirmDuplicate} onClose={closeConfirmForm} onConfirm={confirmDuplicate}
+                         title="آیا میخواهید شیفت های این هفته را تکرار کنید ؟"/>
         </>
     );
 }
-
 const breadCrumbs = [
     {
         title: "بخش ها",
@@ -174,3 +219,4 @@ Show.layout = page => <AdminLayout auth={page.props.auth} children={page} breadc
 }]}/>
 
 export default Show;
+

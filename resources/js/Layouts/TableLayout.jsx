@@ -18,7 +18,7 @@ const TableLayout = ({
                          ExpandedComponent = null,
                          expandedKey
                      }) => {
-    const handlePageSizeChange = (p) => reload(1, defaultValues.filters, defaultValues.sort[0], p);
+    const handlePageSizeChange =e=> reload(1, defaultValues.filters, defaultValues.sort[0], e.target.value);
     const handlePageChange = (p) => reload(p + 1, defaultValues.filters, defaultValues.sort[0], defaultValues.pageSize);
     const handleFilterChange = (filter) => () => reload(1, filter, defaultValues.sort[0], defaultValues.pageSize);
     const handleSortChange = (sortModel) => reload(1, defaultValues.filters, sortModel, defaultValues.pageSize)

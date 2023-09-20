@@ -49,7 +49,8 @@ class ShiftStoreRequest extends FormRequest
             "ended_at" => ["required", new TimeCheck("gt", "started_at")],
             "type" => ["required", "in:normal,open"],
             "noUsers" => ["required", "min:1"],
-            "related" => [new CheckShiftRelated()]
+            "related.id" => "excludeIf:type,open|required|exists:users,id",
+            "related.*.id" => "exclude:type,normal|required|exists:roles,id"
         ];
     }
 }

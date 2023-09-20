@@ -1,12 +1,17 @@
 <?php
 
+use App\Http\Controllers\Admin\ClientRequestListController;
 use App\Http\Controllers\Admin\ConfirmClientRequestController;
+use App\Http\Controllers\Admin\ConfirmLeaveController;
 use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\DuplicateWeekShiftsController;
+use App\Http\Controllers\Admin\LeaveController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RejectClientRequestController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\Admin\ShiftController;
+use App\Http\Controllers\Admin\ShiftPublishController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CancelClientRequestController;
 use App\Http\Controllers\ClientRequestController;
@@ -15,6 +20,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OptionController;
+use App\Models\Work;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -34,7 +40,6 @@ Route::get('/', HomeController::class);
 
 
 Route::middleware('auth')->group(function () {
-
     Route::name("admin.")->prefix("admin")->group(function () {
         Route::get('/', App\Http\Controllers\Admin\DashboardController::class)->name('dashboard');
         Route::resource('/users', UserController::class);
@@ -42,9 +47,14 @@ Route::middleware('auth')->group(function () {
         Route::resource('/permissions', PermissionController::class);
         Route::resource('/departments', DepartmentController::class)->except(["edit"]);
         Route::resource('/rooms', RoomController::class)->except(["edit"]);
+        Route::post("/{room}/duplicate-shifts", DuplicateWeekShiftsController::class)->name("rooms.shifts_duplicate");
         Route::resource('/shifts', ShiftController::class)->except(["edit", "create"]);
+        Route::post('/shifts/{shift}/publish', ShiftPublishController::class)->name("shifts.publish");
         Route::post("/client-requests/{clientRequest}/confirm", ConfirmClientRequestController::class)->name("clientRequests.confirm");
         Route::post("/client-requests/{clientRequest}/reject", RejectClientRequestController::class)->name("clientRequests.reject");
+        Route::get("/client-requests", ClientRequestListController::class)->name("clientRequests.index");
+        Route::post("/leaves/{leave}/confirm", ConfirmLeaveController::class)->name("leaves.confirm");
+        Route::post("/leaves/{leave}/reject", RejectClientRequestController::class)->name("leaves.reject");
     });
 
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
@@ -64,4 +74,5 @@ Route::middleware('auth')->group(function () {
     Route::get("/shifts", ClientShiftListController::class)->name("client.shifts.index");
 
 });
+
 require __DIR__ . '/auth.php';

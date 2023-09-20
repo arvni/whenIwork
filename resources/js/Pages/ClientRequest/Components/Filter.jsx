@@ -21,6 +21,7 @@ const Filter = ({defaultFilter, onFilter}) => {
                   title={"نوع درخواست"}>
                 <Tab value={"shift"} label={<Typography fontWeight={800}> درخواست شیفت</Typography>}/>
                 <Tab value={"changeUser"} label={<Typography fontWeight={800}> درخواست تغییر شیفت</Typography>}/>
+                <Tab value={"takeLeave"} label={<Typography fontWeight={800}> درخواست مرخصی</Typography>}/>
                 <Tab value={"revised"} label={<Typography fontWeight={800}> درخواست بازبینی </Typography>}/>
             </Tabs>
             <Accordion>

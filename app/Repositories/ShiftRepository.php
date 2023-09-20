@@ -7,28 +7,20 @@ use App\Interfaces\WorkRepositoryInterface;
 use App\Models\Attendance;
 use App\Models\ClientRequest;
 use App\Models\Shift;
+use App\Models\User;
 use App\Models\Work;
 use Carbon\Carbon;
 use Spatie\Permission\Models\Permission;
 
 class ShiftRepository extends BaseRepository implements ShiftRepositoryInterface
 {
-    protected $workRepository;
+    protected WorkRepositoryInterface $workRepository;
 
     public function __construct(Shift $shift, WorkRepositoryInterface $workRepository)
     {
         $this->workRepository = $workRepository;
         parent::__construct($shift, Shift::query());
     }
-
-    public function listAll($queryData)
-    {
-        $query = auth()->user()->Shifts();
-        $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["sort"]);
-        return $query->get();
-    }
-
 
     public function listAllowed(array $queryData)
     {
@@ -44,7 +36,7 @@ class ShiftRepository extends BaseRepository implements ShiftRepositoryInterface
             ->withCount([
                 "ClientRequests" => function ($q) {
                     $q->where("user_id", auth()->user()->id);
-                }, "Works"]);
+                }, "Works" => fn($q) => $q->where("user_id", auth()->user()->id)]);
         return $this->list($queryData);
     }
 
@@ -56,8 +48,10 @@ class ShiftRepository extends BaseRepository implements ShiftRepositoryInterface
         $shift->save();
         if ($shift->type !== "open")
             $this->createWork($shift, $data["related"]["id"]);
-        return $shift;
+        else
+            $shift->Roles()->sync(collect($data["related"])->pluck("id")->toArray());
 
+        return $shift;
     }
 
     public function show(Shift $shift)
@@ -108,6 +102,11 @@ class ShiftRepository extends BaseRepository implements ShiftRepositoryInterface
         if (isset($filters["type"])) {
             $query->where("type", $filters["type"]);
         }
+        if (isset($filters["user_id"])) {
+            $query->WhereHas("Users", function ($q) use ($filters) {
+                $q->where("users.id", $filters["user_id"]);
+            });
+        }
         return $query;
     }
 
@@ -118,9 +117,12 @@ class ShiftRepository extends BaseRepository implements ShiftRepositoryInterface
 
     public function getQuery()
     {
-        $roomIds = Permission::where("name", "like", "client.Department.%")->get(["name"])->pluck(["name"])->map(fn($name) => (int)last(explode(".", $name)));
-        return $this->query->whereHas("Room", function ($q) use ($roomIds) {
-            $q->whereIn("id", $roomIds);
+        return $this->query->active()->whereHas("Roles", function ($q) {
+            $q->whereIn("id", auth()
+                ->user()
+                ->roles()->select("id"));
+        })->orWhereHas("Users", function ($q) {
+            $q->where("users.id", auth()->user()->id);
         });
     }
 
@@ -147,5 +149,10 @@ class ShiftRepository extends BaseRepository implements ShiftRepositoryInterface
             "shift_id" => $shift->id,
             "accepted" => true
         ]);
+    }
+
+    public function publish(Shift $shift)
+    {
+        $shift->update(["isActive" => true]);
     }
 }

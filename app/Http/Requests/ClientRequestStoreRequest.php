@@ -3,8 +3,11 @@
 namespace App\Http\Requests;
 
 use App\Models\ClientRequest;
+use App\Models\Room;
 use App\Rules\TimeCheck;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\Rule;
 
 class ClientRequestStoreRequest extends FormRequest
@@ -16,7 +19,7 @@ class ClientRequestStoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return $this->get("type") === "takeLeave" || Gate::allows("create", [ClientRequest::class, Room::find(optional($this->get("requestable"))["room"]["id"])]);
     }
 
     /**
@@ -29,9 +32,10 @@ class ClientRequestStoreRequest extends FormRequest
         return [
             "requestable.id" => "excludeIf:type,takeLeave|required|exists:shifts,id",
             "type" => "required|in:changeUser,takeLeave,shift",
-            "requestable.date" => ["requiredIf:type,takeLeave"],
-            "requestable.range.from" => ["requiredIf:type,takeLeave", new TimeCheck("gt", "to")],
-            "requestable.range.to" => ["requiredIf:type,takeLeave", new TimeCheck("lt", "from")],
+            "requestable.date" => ["excludeIf:requestable.type,daily", "requiredIf:type,takeLeave"],
+            "requestable.range" => ["excludeIf:requestable.type,hourly", "requiredIf:type,takeLeave", "array"],
+            "requestable.range.from" => ["excludeIf:requestable.type,daily", "requiredIf:type,takeLeave", new TimeCheck("gt", "to")],
+            "requestable.range.to" => ["excludeIf:requestable.type,daily", "requiredIf:type,takeLeave", new TimeCheck("lt", "from")],
         ];
     }
 }

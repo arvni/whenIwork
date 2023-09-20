@@ -8,12 +8,6 @@ import {CacheProvider} from '@emotion/react';
 import createCache from '@emotion/cache';
 import {SnackbarProvider} from "notistack";
 import {
-    ManageAccounts as ManageAccountsIcon,
-    Groups as GroupsIcon,
-    Dashboard as DashboardIcon, BusinessSharp, Room,
-
-} from "@mui/icons-material";
-import {
     Paper,
     CssBaseline,
     Box,
@@ -28,8 +22,6 @@ import AppMenu from "@/Layouts/Components/AppMenu";
 import Loading from "@/Components/Loading";
 import {Inertia} from "@inertiajs/inertia";
 import ChangePasswordForm from "@/Components/ChangePasswordForm";
-import PendingActionsIcon from '@mui/icons-material/PendingActions';
-import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 
 InertiaProgress.init({
     // The delay after which the progress bar will

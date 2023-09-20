@@ -10,6 +10,8 @@ interface ClientRequestRepositoryInterface
 {
     public function list(array $queryData);
 
+    public function adminList(array $queryData);
+
     public function create(array $roomData);
 
     public function show($room);

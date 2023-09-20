@@ -36,6 +36,12 @@ const Form = ({values, setValues, cancel, submit, errors, open, loading, title, 
         if (values.type !== "open") {
             if (values.related === "" || !values?.related?.id) {
                 setError("related", "لطفا یک کاربر را انتخاب کنید");
+                output = false;
+            }
+        } else {
+            if (!values?.related?.length) {
+                setError("related", "لطفا یک نقش را انتخاب کنید");
+                output = false;
             }
         }
         if (values.noUsers < 1) {
@@ -74,7 +80,7 @@ const Form = ({values, setValues, cancel, submit, errors, open, loading, title, 
                         <TextField name={"ended_at"} fullWidth onChange={handleChange} value={values.ended_at}
                                    label={"پایان"} type={"time"} error={errors.hasOwnProperty("ended_at")}
                                    helperText={errors?.ended_at}
-                                   inputProps={{step: 3600, pattern:"[0-2][0-9]:[0-5][0-9]", min: values.started_at}}/>
+                                   inputProps={{step: 3600, pattern: "[0-2][0-9]:[0-5][0-9]", min: values.started_at}}/>
                     </Grid>
                     <Grid item xs={6}>
 
@@ -87,20 +93,31 @@ const Form = ({values, setValues, cancel, submit, errors, open, loading, title, 
                             label={<FormLabel>نوع شیفت</FormLabel>} labelPlacement={"top"}
                             sx={{alignItems: "center", justifyContent: "space-between", width: "100%", margin: 0}}/>
                     </Grid>
-                    {values.type === "open" ? <Grid item xs={4.5}>
-                        <TextField name={"noUsers"} fullWidth onChange={handleChange} value={values.noUsers}
-                                   label={"تعداد کاربران"} type={"number"} error={errors.hasOwnProperty("noUsers")}
-                                   helperText={errors?.noUsers} inputProps={{min: 1}}/>
-                    </Grid> :
-                    <Grid item xs={12}>
-                        <SelectSearch value={values?.related}
-                                      name={"related"}
-                                      onChange={handleChange}
-                                      url={route(`admin.userApi.index`)}
-                                      label={"کابر"}
-                                      helperText={errors?.related ?? ""}
-                                      error={Object.keys(errors).includes('related')}/>
-                    </Grid>}
+                    {values?.room?.id && (values.type === "open" ? <>
+                            <Grid item xs={4.5}>
+                                <TextField name={"noUsers"} fullWidth onChange={handleChange} value={values.noUsers}
+                                           label={"تعداد کاربران"} type={"number"} error={errors.hasOwnProperty("noUsers")}
+                                           helperText={errors?.noUsers} inputProps={{min: 1}}/>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <SelectSearch value={values?.related} multiple
+                                              name={"related"}
+                                              onChange={handleChange}
+                                              url={route("client.roomsApi.roles", values.room.id)}
+                                              label={"نقش های مرتبط با شیفت"}
+                                              helperText={errors?.related ?? ""}
+                                              error={Object.keys(errors).includes('related')}/>
+                            </Grid>
+                        </> :
+                        <Grid item xs={12}>
+                            <SelectSearch value={values?.related}
+                                          name={"related"}
+                                          onChange={handleChange}
+                                          url={route("client.roomsApi.users", values.room.id)}
+                                          label={"کابر"}
+                                          helperText={errors?.related ?? ""}
+                                          error={Object.keys(errors).includes('related')}/>
+                        </Grid>)}
                     <Grid item xs={12}>
                         <TextField name={"description"} fullWidth onChange={handleChange} value={values.description}
                                    label={"توضیحات"} multiline rows={3} error={errors.hasOwnProperty("description")}

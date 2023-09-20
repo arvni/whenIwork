@@ -8,6 +8,7 @@ use App\Http\Requests\RoomStoreRequest;
 use App\Interfaces\DepartmentRepositoryInterface;
 use App\Interfaces\RoomRepositoryInterface;
 use App\Models\Room;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -26,9 +27,9 @@ class RoomController extends Controller
 
     public function index(Request $request)
     {
-        $defaultValues=$request->all();
+        $defaultValues = $request->all();
         $rooms = $this->roomRepository->list($defaultValues);
-        return Inertia::render("Admin/Room/Index", compact("rooms","defaultValues"));
+        return Inertia::render("Admin/Room/Index", compact("rooms", "defaultValues"));
     }
 
     public function store(RoomStoreRequest $request)
@@ -39,12 +40,13 @@ class RoomController extends Controller
 
     public function show(Room $room, Request $request)
     {
-        $this->authorize("view",$room );
-
+        $this->authorize("view", $room);
         $week = fn() => $this->roomRepository->shiftList($room, $request->all());
-        $room = fn() => $this->roomRepository->show($room);
+        $countShifts = fn() => $this->roomRepository->countShifts($room, $request->all());
+        $room = $this->roomRepository->show($room);
 
-        return Inertia::render("Admin/Room/Show", compact("room", "week", ));
+        $futureWeek = Carbon::parse($request->get("filters")["date"][0], "Asia/Tehran")->greaterThan(Carbon::now("Asia/Tehran"));
+        return Inertia::render("Admin/Room/Show", compact("room", "week", "countShifts", "futureWeek"));
     }
 
     public function update(Room $room, RoomUpdateRequest $request)

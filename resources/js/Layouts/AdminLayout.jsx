@@ -8,12 +8,13 @@ import {
     Room
 } from "@mui/icons-material";
 import React from "react";
+import EditCalendarIcon from "@mui/icons-material/EditCalendar";
 
 const AdminLayout=({auth, breadcrumbs, children})=>{
     const routes = [
         {
             title: "داشبورد",
-            href: 'dashboard',
+            href: 'admin.dashboard',
             icon: <DashboardIcon/>,
         },
         {
@@ -26,6 +27,11 @@ const AdminLayout=({auth, breadcrumbs, children})=>{
             title: "بخش ها",
             href: 'admin.rooms.index',
             icon: <Room/>,
+        },
+        {
+            title: "درخواست ها",
+            href: "admin.clientRequests.index",
+            icon: <EditCalendarIcon/>
         },
         {
             title: "لیست کاربران",

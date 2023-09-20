@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {Head, useForm} from "@inertiajs/inertia-react";
 import {GridActionsCellItem} from "@mui/x-data-grid";
-import {Password, Delete as DeleteIcon, Edit as EditIcon} from "@mui/icons-material";
+import {Password, Delete as DeleteIcon, Edit as EditIcon, RemoveRedEye} from "@mui/icons-material";
 import TableLayout from "@/Layouts/TableLayout";
 import DeleteForm from "@/Components/DeleteForm";
 import ChangePassword from "./Components/ChangePassword";
@@ -32,18 +32,21 @@ const Index = ({users, status, defaultValues, success}) => {
             width: 100,
             sortable: false,
             renderCell: (params) => ([
+                <GridActionsCellItem key={"show-" + params.value} icon={<RemoveRedEye color={"success"}/>} label="حذف"
+                                     onClick={show(params.row)}/>,
                 <GridActionsCellItem key={"edit-" + params.value} icon={<EditIcon color={"warning"}/>} label="بروزرسانی"
                                      onClick={edit(params.row.id)}/>,
                 <GridActionsCellItem key={"change-password-" + params.value} icon={<Password/>} label="تغییر رمز عبور"
                                      onClick={editPassword(params.row.id)}
                 />,
                 <GridActionsCellItem key={"delete-" + params.value} icon={<DeleteIcon color={"error"}/>} label="حذف"
-                                     onClick={destroy(params.row)}/>
+                                     onClick={destroy(params.row)}/>,
             ])
         }
     ];
     const [user, setUser] = useState(null);
 
+    const show = (id) => () => Inertia.visit(route('admin.users.show', id));
     const edit = (id) => () => Inertia.visit(route('admin.users.edit', id));
 
     const destroy = (params) => () => {

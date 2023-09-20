@@ -15,23 +15,28 @@ class Shift extends Model
         "started_at",
         "ended_at",
         "date",
-        "type"
+        "type",
+        "isActive"
     ];
 
     protected $appends = [
         "started_at_dateTime"
     ];
 
+    //additional Attribute
     public function getStartedAtDateTimeAttribute()
     {
         return Carbon::parse("$this->date $this->started_at", config("app.timezone"));
     }
 
-    public function Attendances()
+    //Scopes
+    public function scopeActive($query)
     {
-        return $this->hasMany(Attendance::class);
+        return $query->where("isActive", true);
     }
 
+
+    // Relations
     public function Room()
     {
         return $this->belongsTo(Room::class);
@@ -44,17 +49,12 @@ class Shift extends Model
 
     public function Roles()
     {
-        return $this->morphToMany(\Spatie\Permission\Models\Role::class, "attendable", "attendances", "shift_id", "attendable_id", null, null, true);
+        return $this->belongsToMany(Role::class, "role_shift");
     }
 
     public function Users()
     {
-        return $this->hasManyThrough(User::class, Work::class);
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where("isActive", true);
+        return $this->belongsToMany(User::class, "works")->withPivot(["user_id", "changed", "accepted"]);
     }
 
     public function ClientRequests()

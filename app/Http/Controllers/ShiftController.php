@@ -26,9 +26,9 @@ class ShiftController extends Controller
      */
     public function index(Request $request)
     {
-        $defaultValues=$request->all();
-        $shifts = $this->shiftRepository->list($defaultValues);
-        return Inertia::render("Shift/Index", compact("shifts","defaultValues"));
+        $defaultValues = $request->all();
+        $shifts = $this->shiftRepository->listAllowed($defaultValues);
+        return Inertia::render("Shift/Index", compact("shifts", "defaultValues"));
     }
 
 }

@@ -26,4 +26,8 @@ interface RoomRepositoryInterface {
     public function allowedUsersList(Room $room, array $queryData);
 
     public function allowedRolesList(Room $room, array $queryData);
+
+    public function countShifts(Room $room,array $queryData);
+
+    public function duplicateShifts(Room $room,array $date);
 }

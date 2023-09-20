@@ -9,8 +9,10 @@ use App\Interfaces\ShiftRepositoryInterface;
 use App\Interfaces\UserRepositoryInterface;
 use App\Interfaces\WorkRepositoryInterface;
 use App\Models\ClientRequest;
+use App\Models\Leave;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Models\Permission;
 
 class ClientRequestRepository extends BaseRepository implements ClientRequestRepositoryInterface
@@ -24,23 +26,36 @@ class ClientRequestRepository extends BaseRepository implements ClientRequestRep
     public function __construct(ClientRequest $clientRequest,
                                 PermissionRepositoryInterface $permissionRepository,
                                 UserRepositoryInterface $userRepository,
-                                ShiftRepositoryInterface $shiftRepository, LeaveRepositoryInterface $leaveRepository)
+                                ShiftRepositoryInterface $shiftRepository,
+                                LeaveRepositoryInterface $leaveRepository)
     {
         $this->permissionRepository = $permissionRepository;
         $this->leaveRepository = $leaveRepository;
         $this->userRepository = $userRepository;
         $this->shiftRepository = $shiftRepository;
-        $this->query = $clientRequest->with([
-            'requestable',
-            'revisableBy:id,name',
-            'user:id,name',
-        ]);
+        $this->query = $clientRequest->with(['requestable', 'revisableBy:id,name', 'user:id,name']);
         parent::__construct($clientRequest, $this->query);
+    }
+
+    public function adminList($queryData)
+    {
+        $this->query->where(function ($q) {
+            if (Gate::allows("check", Leave::class)) {
+                $q->where("type", "takeLeave");
+            }
+            $q->orWhere(fn($qu) => $this->applyAllowedRooms($qu));
+        })->withAggregate("user", "name");
+
+        if (isset(optional($queryData["filters"])["date"])) {
+            $this->query->whereBetween("created_at", $queryData["filters"]["date"]);
+        }
+
+        $this->applyOrderBy($this->query, $queryData["sort"]);
+        return fn() => $this->applyPaginate($this->query, $queryData["pageSize"]);
     }
 
     public function create(array $clientRequestData)
     {
-
         $clientRequest = $this->model->fill($clientRequestData);
         $clientRequest->user()->associate(auth()->user()->id);
         $this->setRelation($clientRequest, $clientRequestData);
@@ -56,7 +71,6 @@ class ClientRequestRepository extends BaseRepository implements ClientRequestRep
     public function edit(ClientRequest $clientRequest, $clientRequestNewData)
     {
         $clientRequest->fill($clientRequestNewData);
-        $this->setRelation($clientRequest, $clientRequestNewData);
         if ($clientRequest->isDirty())
             $clientRequest->update();
         return $clientRequest;
@@ -78,7 +92,7 @@ class ClientRequestRepository extends BaseRepository implements ClientRequestRep
         } else if (isset($filters["type"])) {
             $query->where("user_id", auth()->user()->id)->where("type", $filters["type"]);
         } else
-            $query->where("user_id", auth()->user()->id);
+            $query->where("user_id", auth()->user()->id)->where("type", "shift");
         if (isset($filters["date"])) {
             $query->whereBetween("created_at", $filters["date"]);
         }
@@ -95,6 +109,8 @@ class ClientRequestRepository extends BaseRepository implements ClientRequestRep
             case "shift":
                 $this->setShiftRelation($clientRequest, $clientRequestData);
                 break;
+            case "takeLeave":
+                $this->createOrUpdateLeave($clientRequest, $clientRequestData["requestable"]);
         }
     }
 
@@ -129,14 +145,14 @@ class ClientRequestRepository extends BaseRepository implements ClientRequestRep
             "type" => "changeUser",
             "message" => "تغییر شیفت از کاربر $oldUser"
         ]);
-        $newClientRequest->User()->associate(auth()->user());
+        $newClientRequest->User()->associate(auth()->user()->id);
         $newClientRequest->Requestable()->associate($clientRequest->Requestable);
         $newClientRequest->save();
     }
 
     public function adminReject(ClientRequest $clientRequest, $requestDetails)
     {
-        $clientRequest->RevisableBy()->associate(auth()->user());
+        $clientRequest->RevisableBy()->associate(auth()->user()->id);
         $clientRequest->status = "rejected";
         $clientRequest->comment = $requestDetails["comment"] ?? "";
         $clientRequest->save();
@@ -157,7 +173,7 @@ class ClientRequestRepository extends BaseRepository implements ClientRequestRep
 
     public function adminConfirm(ClientRequest $clientRequest)
     {
-        $clientRequest->RevisableBy()->associate(auth()->user());
+        $clientRequest->RevisableBy()->associate(auth()->user()->id);
         $clientRequest->status = "accepted";
         $clientRequest->save();
 
@@ -172,7 +188,47 @@ class ClientRequestRepository extends BaseRepository implements ClientRequestRep
                 $this->shiftRepository->acceptOpenShift($clientRequest->Requestable, $clientRequest);
                 break;
         }
-
-
     }
+
+    private function createOrUpdateLeave(ClientRequest $clientRequest, $data)
+    {
+        if (!$clientRequest->id) {
+            $leave = $this->leaveRepository->create($data);
+            $clientRequest->Requestable()->associate($leave);
+        } else
+            $this->leaveRepository->edit($clientRequest->Requestable, $data);
+    }
+
+    private function applyAllowedRooms($query)
+    {
+        list($rooms, $departments) = $this->getRoomsAndDepartmentsIds();
+        $query->whereHas("Shift", function ($q) use ($rooms, $departments) {
+            $q->whereHas("Room", function ($qu) use ($rooms, $departments) {
+                $qu->whereIn("id", $rooms)->orWhereHas("Department", function ($qur) use ($departments) {
+                    $qur->whereIn("id", $departments);
+                });
+            });
+        });
+    }
+
+    private function getRoomsAndDepartmentsIds()
+    {
+        $permissions = auth()
+            ->user()
+            ->getAllPermissions()
+            ->pluck("name")
+            ->filter(fn($item) => preg_match("/^admin\.Department\..*$/", $item));
+        $departments = [];
+        $rooms = [];
+        foreach ($permissions as $permission) {
+            $explodedPermissionName = explode(".", $permission);
+            if (count($explodedPermissionName) == 3)
+                $departments[] = last($explodedPermissionName);
+            else
+                $rooms[] = last($explodedPermissionName);
+        }
+
+        return [$rooms, $departments];
+    }
+
 }

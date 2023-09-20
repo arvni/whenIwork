@@ -5,6 +5,7 @@ namespace App\Interfaces;
 
 
 use App\Models\ClientRequest;
+use App\Models\Shift;
 use App\Models\Work;
 
 interface WorkRepositoryInterface

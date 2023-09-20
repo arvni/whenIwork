@@ -11,7 +11,7 @@ import {
 import ShiftRow from "@/Pages/Shift/Components/ShiftRow";
 
 
-const DayShiftsContainer = ({day, onChange, onAddClick, onShow, onEdit, onDelete, expanded = false}) => {
+const DayShiftsContainer = ({day, onChange, onAddClick, onShow, onEdit, onDelete, onPublish, expanded = false}) => {
     const isFutureDay = new Date(day.date) - new Date(new Date().toDateString()) > 0;
 
     return <Accordion expanded={expanded} onChange={onChange(day.date)}>
@@ -38,12 +38,7 @@ const DayShiftsContainer = ({day, onChange, onAddClick, onShow, onEdit, onDelete
                         <TableCell>
                             تعداد درخواست ها
                         </TableCell>
-                        <TableCell>
-                            تعداد درخواست های تایید شده
-                        </TableCell>
-                        <TableCell>
-                            تعداد درخواست های منتظر
-                        </TableCell>
+                        <TableCell>کاربر یا نقش مرتبط</TableCell>
                         <TableCell>#</TableCell>
                     </TableRow>
                 </TableHead>
@@ -54,7 +49,7 @@ const DayShiftsContainer = ({day, onChange, onAddClick, onShow, onEdit, onDelete
                                                                 onShow={onShow}
                                                                 onEdit={onEdit}
                                                                 onDelete={onDelete}
-                                                                day={day}/>)}
+                                                                day={day} onPublish={onPublish}/>)}
                 </TableBody>
             </Table> : null}
             {isFutureDay && (<Box sx={{padding: 1, textAlign: "center"}}>

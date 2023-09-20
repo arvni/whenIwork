@@ -1,7 +1,13 @@
-import {IconButton, Stack, TableCell, TableRow} from "@mui/material";
-import {Delete as DeleteIcon, Edit as EditIcon, RemoveRedEye as RemoveRedEyeIcon} from "@mui/icons-material";
+import {IconButton, Stack, TableCell, TableRow, Typography} from "@mui/material";
+import {
+    Delete as DeleteIcon,
+    Edit as EditIcon,
+    RemoveRedEye as RemoveRedEyeIcon,
+    AssignmentTurnedIn as AssignmentTurnedInIcon
+} from "@mui/icons-material";
+import PoperWraper from "@/Components/PoperWraper";
 
-const ShiftRow = ({shift, onShow, onEdit, onDelete, day, index}) => {
+const ShiftRow = ({shift, onShow, onEdit, onDelete, day, index, onPublish}) => {
     return <>
         <TableRow>
             <TableCell>{index + 1}</TableCell>
@@ -9,15 +15,25 @@ const ShiftRow = ({shift, onShow, onEdit, onDelete, day, index}) => {
             <TableCell>{shift.ended_at.substr(0, shift.ended_at.length - 3)}</TableCell>
             <TableCell>{shift.type}</TableCell>
             <TableCell>{shift.noUsers}</TableCell>
-            <TableCell>{shift.client_requests_count}</TableCell>
-            <TableCell>{shift.accepted_client_requests_count}</TableCell>
-            <TableCell>{shift.waiting_client_requests_count}</TableCell>
+            <TableCell>
+                <PoperWraper component={<Typography>{shift.client_requests_count}</Typography>}>
+                    <Stack gap={2} p={2}>
+                        <span><strong>درخواست های تایید شده</strong> : {shift.accepted_client_requests_count}</span>
+                        <span><strong>درخواست های در انتظار</strong> : {shift.waiting_client_requests_count}</span>
+                    </Stack>
+                </PoperWraper>
+            </TableCell>
+            <TableCell>{(shift.type === "open" ? shift.roles : shift.users).map(item => item.name).join(",")}</TableCell>
             <TableCell>
                 <Stack direction={"row"} spacing={.5}>
                     <IconButton onClick={onShow(shift.id)} color={"success"}>
                         <RemoveRedEyeIcon/>
                     </IconButton>
                     {new Date(day.date) - new Date(new Date().toDateString()) > 0 ? <>
+                        {!shift.isActive && <IconButton color={"info"} onClick={onPublish(shift.id)}
+                                                        title={"چاپ شبفت"}>
+                            <AssignmentTurnedInIcon/>
+                        </IconButton>}
                         <IconButton color={"warning"} onClick={onEdit(shift.id)}
                                     title={"بروزرسانی شیفت"}>
                             <EditIcon/>

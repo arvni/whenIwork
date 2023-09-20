@@ -1,22 +1,18 @@
 import {IconButton, Table, TableBody, TableCell, TableHead, TableRow} from "@mui/material";
 import {Cancel, Close, Done} from "@mui/icons-material";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import {convertDate, convertDateTime} from "@/Services/helper";
+import {convertDateTime} from "@/Services/helper";
 import {useForm} from "@inertiajs/inertia-react";
 import CancelRequest from "@/Pages/Shift/Components/CancelRequest";
 import {useState} from "react";
+import {requestTypes} from "@/Pages/ClientRequest";
 
-export const renderStatus = (status) => {
-    switch (status) {
-        case "waiting":
-            return <AccessTimeIcon color={"warning"}/>
-        case "canceled":
-        case "rejected":
-            return <Cancel color={"error"}/>;
-        case "accepted":
-            return <Done color={"success"}/>
-    }
-}
+export const statuses = new Map([["waiting", <AccessTimeIcon color={"warning"}/>],
+    ["rejected", <Cancel color={"error"}/>],
+    ["canceled", <Cancel color={"error"}/>],
+    ["accepted", <Done color={"success"}/>]])
+
+export const renderStatus = (status) => statuses.get(status);
 
 const ExpandedComponent = ({data: requests}) => {
     const {setData, post, reset, data} = useForm();
@@ -39,7 +35,7 @@ const ExpandedComponent = ({data: requests}) => {
         <Table>
             <TableHead>
                 <TableRow>
-                    <TableCell>نوغ</TableCell>
+                    <TableCell>نوع</TableCell>
                     <TableCell>وضعیت</TableCell>
                     <TableCell>زمان درخواست</TableCell>
                     <TableCell>زمان آخرین تغیییرات</TableCell>
@@ -49,7 +45,7 @@ const ExpandedComponent = ({data: requests}) => {
             </TableHead>
             <TableBody>
                 {requests.map(row => <TableRow key={row.id}>
-                    <TableCell>{row.type}</TableCell>
+                    <TableCell>{requestTypes.get(row.type)}</TableCell>
                     <TableCell>{renderStatus(row.status)}</TableCell>
                     <TableCell>{convertDateTime(row.created_at)}</TableCell>
                     <TableCell>{convertDateTime(row.updated_at)}</TableCell>

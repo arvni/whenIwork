@@ -29,7 +29,6 @@ class ClientRequestController extends Controller
 
     public function store(ClientRequestStoreRequest $request)
     {
-        $this->authorize("create", [ClientRequest::class, Room::find(optional($request->get("requestable"))["room"]["id"])]);
         $this->clientRequestRepository->create($request->all());
         return $this->responseWithSuccess(__("messages.successAdded", ["title" => "درخواست"]));
     }

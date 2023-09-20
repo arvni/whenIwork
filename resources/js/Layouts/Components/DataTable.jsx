@@ -106,7 +106,7 @@ const DataTable = ({
                     </TableRow>}
             </TableBody>
         </Table>
-        {page ? <TablePagination
+        <TablePagination
             rowsPerPageOptions={rowsPerPageOptions}
             component="div"
             count={rowCount}
@@ -115,7 +115,7 @@ const DataTable = ({
             onPageChange={onPageChange}
             onRowsPerPageChange={onPageSizeChange}
             {...localeText.MuiTablePagination}
-        /> : null}
+        />
     </Container>
 }
 

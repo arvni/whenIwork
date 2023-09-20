@@ -19,15 +19,21 @@ abstract class BaseRepository implements RepositoryInterface
 
     public function list(array $queryData)
     {
-        $query = $this->applyFilters($this->query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["sort"]);
-        return $this->applyPaginate($query, $queryData["pageSize"]);
+        $query = $this->query;
+        if (isset($queryData["filters"]))
+            $this->applyFilters($query, $queryData["filters"]);
+        if (isset($queryData["sort"]))
+            $this->applyOrderBy($query, $queryData["sort"]);
+        if (isset($queryData["pageSize"]))
+            return $this->applyPaginate($query, $queryData["pageSize"]);
+        return $query->get();
     }
 
     public function listAll($queryData)
     {
         $query = $this->applyFilters($this->query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["sort"]);
+        if (isset($queryData["sort"]))
+            $this->applyOrderBy($query, $queryData["sort"]);
         return $query->get();
     }
 

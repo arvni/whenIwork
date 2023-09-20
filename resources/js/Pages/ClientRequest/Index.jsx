@@ -2,13 +2,10 @@ import {useState} from "react";
 import {Inertia} from "@inertiajs/inertia";
 import {Head, useForm, usePage} from "@inertiajs/inertia-react";
 
-import {convertDate} from "@/Services/helper";
+import {convertDate, convertDateTime} from "@/Services/helper";
 
-import {colors, IconButton, Stack} from "@mui/material";
+import {IconButton, Stack} from "@mui/material";
 import {
-    PendingActions as PendingActionsIcon,
-    CheckCircle as CheckCircleIcon,
-    Cancel as CancelIcon,
     Edit as EditIcon,
     Delete as DeleteIcon, Close, Done
 } from '@mui/icons-material';
@@ -22,19 +19,17 @@ import ExpandedComponent from "./Components/ExpandedComponent";
 import ConfirmForm from "@/Pages/Admin/Shift/Components/ConfirmForm";
 import RejectForm from "@/Pages/Admin/Shift/Components/RejectForm";
 import ClientLayout from "@/Layouts/ClientLayout";
+import {renderStatus} from "@/Pages/Shift/Components/ExpandedComponent";
 
 
-const renderStatus = ({row}) => {
-    switch (row.status) {
-        case "waiting":
-            return <PendingActionsIcon sx={{color: colors.yellow.A700}}/>;
-        case "accepted":
-            return <CheckCircleIcon sx={{color: colors.green.A700}}/>;
-        case "canceled":
-        case "rejected":
-            return <CancelIcon sx={{color: colors.red.A400}}/>;
-    }
-}
+export const requestTypes = new Map([
+    ["shift", "درخواست شیفت"],
+    ["changeUser", "درخواست جابه جایی شیفت"],
+    ["takeLeave", "درخواست مرخصی"],
+    ["daily", "مرخصی روزانه"],
+    ["hourly", "مرخصی ساعتی"],
+]);
+
 
 const Index = () => {
     const {post, setData, data, reset, processing} = useForm()
@@ -52,13 +47,14 @@ const Index = () => {
             headerName: 'نوع',
             type: "string",
             flex: .3,
+            renderCell: ({value}) => requestTypes.get(value)
         },
         {
             field: 'created_at',
             headerName: 'تاریخ درخواست',
             type: "date",
             flex: .3,
-            renderCell: ({value}) => convertDate(value)
+            renderCell: ({value}) => convertDateTime(value)
         },
         {
             field: 'message',
@@ -76,7 +72,7 @@ const Index = () => {
             sortable: false,
             disableMenu: true,
             align: "center",
-            renderCell: renderStatus
+            renderCell: ({value}) => renderStatus(value)
         },
         {
             field: 'revisable_by',
@@ -96,7 +92,7 @@ const Index = () => {
             headerName: 'تاریخ آخرین تغییر',
             type: "string",
             flex: .4,
-            renderCell: ({value}) => value ? convertDate(value) : null
+            renderCell: ({value}) => value ? convertDateTime(value) : null
         },
         {
             field: 'id',
@@ -106,7 +102,8 @@ const Index = () => {
             flex: .2,
             renderCell: (params) => {
                 let cols = []
-                if (params.row.status === "waiting") {
+
+                if (params.row.status === "waiting" && new Date()<new Date(params?.row?.requestable?.date)) {
                     if (auth.user.id === params.row.user.id && params.row.status === "waiting") {
                         cols.push(<IconButton key={"edit-" + params.value} title="بروررسانی"
                                               onClick={editClientRequest(params.row)}
@@ -118,6 +115,7 @@ const Index = () => {
                             <DeleteIcon/>
                         </IconButton>);
                     }
+                    console.log(defaultValues?.filters?.type);
                     if (defaultValues?.filters?.type === "revised")
                         cols.push(<Stack direction={"row"} gap={1}>
                             <IconButton onClick={handleReject(params.value)} color={"error"} title={"رد"}>
@@ -173,7 +171,10 @@ const Index = () => {
             onSuccess: successCb
         });
     };
-    const handleSubmitForm = () => post(data.id ? route('client.clientRequests.update', data.id) : route("client.clientRequests.store"), {onSuccess: successCb});
+    const handleSubmitForm = (e) => {
+        e.preventDefault();
+        post(data.id ? route('client.clientRequests.update', data.id) : route("client.clientRequests.store"), {onSuccess: successCb});
+    }
     const addNew = () => {
         setData({type: "takeLeave"});
         setOpenAddForm(true);
@@ -198,18 +199,15 @@ const Index = () => {
         getDataRequestData(id);
         setOpenConfirm(true);
     }
-
     const handleReject = (id) => () => {
         getDataRequestData(id);
         setOpenReject(true);
     }
-
     const confirm = () => {
         post(route("client.clientRequests.confirm", data.id), {
             onSuccess: handleClose
         });
     }
-
     const reject = () => {
         post(route("client.clientRequests.reject", data.id), {
             onSuccess: handleClose
@@ -219,6 +217,7 @@ const Index = () => {
     const handleChange = (key, value) => {
         setData(previousData => ({...previousData, [key]: value}));
     }
+
     return (
         <>
             <Head title={"لیست درخواست ها"}/>

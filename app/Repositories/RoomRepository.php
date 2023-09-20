@@ -18,7 +18,7 @@ class RoomRepository extends BaseRepository implements RoomRepositoryInterface
     #[Pure]
     public function __construct(Room $room, PermissionRepositoryInterface $permissionRepository)
     {
-        parent::__construct($room, Room::query()->withAggregate("Department","name"));
+        parent::__construct($room, Room::query()->withAggregate("Department", "name"));
         $this->permissionRepository = $permissionRepository;
     }
 
@@ -62,9 +62,13 @@ class RoomRepository extends BaseRepository implements RoomRepositoryInterface
 
     public function shiftList(Room $room, array $queryData)
     {
-        $query = $room->Shifts()->withCount(["AcceptedClientRequests","WaitingClientRequests","ClientRequests"]);
+        $query = $room->Shifts()
+            ->with(["Users:name,id", "Roles:name,id",])
+            ->withCount(["AcceptedClientRequests", "WaitingClientRequests", "ClientRequests"]);
+
         $this->applyFilters($query, $queryData["filters"]);
         $this->applyOrderBy($query, $queryData["sort"] ?? ["field" => "date", "sort" => "asc"]);
+
         $shifts = $query->get();
         return $this->prepareWeekDays($shifts, $queryData["filters"]["date"]);
     }
@@ -88,6 +92,7 @@ class RoomRepository extends BaseRepository implements RoomRepositoryInterface
         return $week;
     }
 
+
     public function edit(Room $room, $roomNewData)
     {
         $room->fill($roomNewData);
@@ -108,6 +113,9 @@ class RoomRepository extends BaseRepository implements RoomRepositoryInterface
     {
         if (isset($filters["search"])) {
             $query->search($filters["search"]);
+        }
+        if (isset($filters["date"])) {
+            $query->whereBetween("date", $filters["date"]);
         }
         return $query;
     }
@@ -138,7 +146,7 @@ class RoomRepository extends BaseRepository implements RoomRepositoryInterface
 
     public function allowedUsersList(Room $room, array $queryData)
     {
-        $permission="client.Department.$room->department_id.Room.$room->id";
+        $permission = "client.Department.$room->department_id.Room.$room->id";
         return User::permission($permission)
             ->search($queryData["search"] ?? "")
             ->select(["id", "name"])
@@ -147,9 +155,35 @@ class RoomRepository extends BaseRepository implements RoomRepositoryInterface
 
     public function allowedRolesList(Room $room, array $queryData)
     {
-        return Role::permission("client.Department.$room->department_id.Room.$room->id")
+        return Role::whereHas("permissions", function ($q) use ($room) {
+            $q->where("name", "client.Department.$room->department_id.Room.$room->id");
+        })
             ->search($queryData["search"] ?? "")
-            ->select(["id", "name"])
             ->paginate(10);
+    }
+
+    public function countShifts(Room $room, $queryData)
+    {
+        $query = $room->Shifts();
+        $this->applyFilters($query, $queryData["filters"]);
+        return $query->count();
+    }
+
+    public function duplicateShifts(Room $room, array $date)
+    {
+        list($from,$to)=$date;
+        $fromDate=Carbon::parse($from,"Asia/Tehran")->subDays(7)->toDate();
+        $toDate=Carbon::parse($to,"Asia/Tehran")->subDays(7)->toDate();
+        $shifts=$room->Shifts()->whereBetween("date",[$fromDate,$toDate])->with(["roles:id","works"])->get();
+        foreach ($shifts as $shift){
+            $newShift=$shift->replicate();
+            $newShift->date=Carbon::parse($shift->date)->addDays(7);
+            $newShift->save();
+            if ($shift->type==="open"){
+                $newShift->Roles()->sync($shift->Roles->pluck("id")->toArray());
+            } else{
+                $newShift->Works()->sync($shift->Works->pluck("id")->toArray());
+            }
+        }
     }
 }

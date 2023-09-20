@@ -4,9 +4,11 @@ namespace App\Services;
 
 use App\Interfaces\RepositoryInterface;
 use App\Interfaces\ShiftRepositoryInterface;
+use App\Models\User;
 use App\Repositories\BaseRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Morilog\Jalali\Jalalian;
 
 use App\Interfaces\WorkRepositoryInterface;
@@ -21,7 +23,10 @@ class CalendarService
     private LeaveRepositoryInterface $leaveRepository;
     private ShiftRepositoryInterface $shiftRepository;
 
-    public function __construct(WorkRepositoryInterface $workRepository, LeaveRepositoryInterface $leaveRepository, ShiftRepositoryInterface $shiftRepository)
+    public function __construct(
+        WorkRepositoryInterface $workRepository,
+        LeaveRepositoryInterface $leaveRepository,
+        ShiftRepositoryInterface $shiftRepository)
     {
         $this->workRepository = $workRepository;
         $this->leaveRepository = $leaveRepository;
@@ -29,29 +34,21 @@ class CalendarService
         $this->date = Carbon::now();
     }
 
-    public function listLeaves($date = null)
+    public function listLeaves($date = null, $userId = null)
     {
         if ($date)
             $this->date = Carbon::parse($date);
         $range = $this->dateRangeProvider($this->date);
-        return $this->fetchData($this->leaveRepository, $range, "startedAt");
+        $leaves = $this->fetchData($this->leaveRepository, $range, "started_at", $userId);
+        return $this->convertLeavesToEvents($leaves);
     }
 
-    public function listWorks($date = null)
+    public function listShifts($date = null, $userId = null)
     {
         if ($date)
             $this->date = Carbon::parse($date);
         $range = $this->dateRangeProvider($this->date);
-
-
-    }
-
-    public function listShifts($date = null)
-    {
-        if ($date)
-            $this->date = Carbon::parse($date);
-        $range = $this->dateRangeProvider($this->date);
-        $shifts = $this->fetchData($this->shiftRepository, $range, "date");
+        $shifts = $this->fetchData($this->shiftRepository, $range, "date", $userId);
         return $this->convertShiftToEvents($shifts);
 
     }
@@ -63,13 +60,19 @@ class CalendarService
             "start" => "$shift->date $shift->started_at",
             "end" => "$shift->date $shift->ended_at",
             "id" => "shift-$shift->id",
-            "resources"=>["style"=>["background"=>"#f54df3"]]
+            "className" => "work"
         ])->toArray();
     }
 
-    protected function convertLeavesToEvents()
+    protected function convertLeavesToEvents($leaves)
     {
-
+        return $leaves->map(fn($leave) => [
+            "title" => "مرخصی : " . __("messages." . $leave->type),
+            "start" => Carbon::parse($leave->started_at, "Asia/Tehran")->addMinutes(30)->format("Y-m-d H:i:s"),
+            "end" => Carbon::parse($leave->ended_at, "Asia/Tehran")->addMinutes(30)->format("Y-m-d H:i:s"),
+            "id" => "leave-$leave->id",
+            "className" => $leave->status == "accepted" ? "leave" : "waiting"
+        ])->toArray();
     }
 
     public function dateRangeProvider($date): array
@@ -96,9 +99,13 @@ class CalendarService
             ->format("Y-m-d");
     }
 
-    private function fetchData(RepositoryInterface $query, $range, $sortField)
+    private function fetchData(RepositoryInterface $query, $range, $sortField, $userId = null)
     {
-        return $query->listAll(["filters" => ["date" => $range], "sort" => ["field" => $sortField, "sort" => "desc"]]);
+        if (!(Gate::allows("viewAny", User::class) && $userId)) {
+            $userId = auth()->user()->id;
+        }
+
+        return $query->listAll(["filters" => ["date" => $range, "user_id" => $userId, "status" => ["accepted", "waiting"]], "sort" => ["field" => $sortField, "sort" => "desc"]]);
     }
 
 
