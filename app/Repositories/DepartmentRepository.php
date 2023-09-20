@@ -48,7 +48,7 @@ class DepartmentRepository implements DepartmentRepositoryInterface
 
     private function loadRooms(Department $department, array $queryData)
     {
-        $query = $department->Rooms();
+        $query = $department->Rooms()->withCount("Shifts");
         $this->applyFilters($query, $queryData["filters"]);
         $this->applyOrderBy($query, $queryData["sort"]);
         return $this->applyPaginate($query, $queryData["pageSize"]);
