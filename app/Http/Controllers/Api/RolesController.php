@@ -22,7 +22,7 @@ class RolesController extends Controller
         $search="";
         if(isset($request["search"]))
             $search=$request["search"];
-        $roles=Role::where("name","like","%".$search."%")->orderBy("name")->limit(10)->get(["id","name"]);
+        $roles=Role::where("name","like","%".$search."%")->orderBy("name")->limit(50)->get(["id","name"]);
         return APIResource::collection($roles);
     }
 

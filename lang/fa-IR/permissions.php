@@ -27,7 +27,7 @@ return [
     "admin.permissions.create" => "ثبت دسترسی جدید",
     "admin.permissions.show" => "مشاهده دسترسی ",
     "admin.permissions.edit" => "بروزرسانی دسترسی",
-    "admin.permissions.destroy" => "حذف حذف دسترسی",
+    "admin.permissions.destroy" => "حذف دسترسی",
     "admin.departments.index" => "لیست دپارتمان ها",
     "admin.departments.create" => "ثبت دپارتمان جدید",
     "admin.departments.show" => "مشاهده دپارتمان ",

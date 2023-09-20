@@ -18,17 +18,7 @@ class ShiftResource extends JsonResource
             "id" => $this->id,
             "ended_at" => $this->ended_at,
             "started_at" => $this->started_at,
-            "related" => $this->type == "open" ? $this->attendances->map(function ($item) {
-                return [
-                    "id" => $item->attendable->id,
-                    "name" => $item->attendable->id,
-                    "class" => get_class($item->attendable)
-                ];
-            }) : [
-                "id" => optional(optional($this->attendances->first())->attendable)->id,
-                "name" => optional(optional($this->attendances->first())->attendable)->name,
-                "class" => $this->attendances->first() ? get_class($this->attendances->first()->attendable) : null
-            ],
+            "related" => $this->type == "open" ? $this->Roles : optional($this->Works[0])->User,
             "type" => $this->type,
             "date" => $this->date,
             "noUsers" => $this->noUsers,

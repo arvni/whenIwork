@@ -1,3 +1,4 @@
+import React from "react";
 import {
     Collapse, Container,
     IconButton,
@@ -22,31 +23,30 @@ const renderCell = (row, col) => {
 
 }
 
-function Row(props) {
-    const {row, columns, expandedKey, ExpandedComponent} = props;
+function Row({row, columns, expandedKey, ExpandedComponent}) {
     const [open, setOpen] = useState(false);
     const hasExpandedRow = !!row[expandedKey]
     return (
-        <>
-            <TableRow sx={{'& > *': {borderBottom: 'unset'}}}>
+        <React.Fragment key={"row-"+row.id}>
+            <TableRow sx={{'& > *': {borderBottom: 'unset'}}} key={"row-"+row.id+"-1"}>
                 {ExpandedComponent && <TableCell>
                     {hasExpandedRow &&
                     <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
                         {open ? <KeyboardArrowUp/> : <KeyboardArrowLeft/>}
                     </IconButton>}
                 </TableCell>}
-                {columns.map(col => <TableCell key={col.field + "-" + row.id}>
+                {columns.map(col => <TableCell key={"col-"+col.field + "-" + row.id}>
                     {renderCell(row, col)}
                 </TableCell>)}
             </TableRow>
-            {ExpandedComponent && <TableRow>
+            {ExpandedComponent && <TableRow  key={"row-"+row.id+"-2"}>
                 <TableCell style={{paddingBottom: 0, paddingTop: 0}} colSpan={columns.length + 1}>
                     <Collapse in={open} timeout="auto" unmountOnExit>
                         <ExpandedComponent data={row[expandedKey]}/>
                     </Collapse>
                 </TableCell>
             </TableRow>}
-        </>
+        </React.Fragment>
     );
 }
 

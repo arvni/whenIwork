@@ -98,6 +98,7 @@ const Show = () => {
                     ...res.data,
                     _method: "put"
                 });
+                console.log(data);
                 setAddShiftOpen(true);
             })
             .finally(() => {

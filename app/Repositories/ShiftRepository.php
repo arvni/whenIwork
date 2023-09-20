@@ -56,13 +56,7 @@ class ShiftRepository extends BaseRepository implements ShiftRepositoryInterface
 
     public function show(Shift $shift)
     {
-        $shift->load(["Room" => function ($q) {
-            $q->select(["id", "name"]);
-        }, "Attendances" => function ($q) {
-            $q->with(["attendable" => function ($query) {
-                $query->select("name", "id");
-            }]);
-        }]);
+        $shift->load(["Room:id,name", "Works.User:name,id", "Roles:name,id"]);
         return $shift;
     }
 
@@ -70,8 +64,11 @@ class ShiftRepository extends BaseRepository implements ShiftRepositoryInterface
     {
         $shift->Room()->associate($shiftNewData["room"]["id"]);
         $shift->update($shiftNewData);
+        $shift->Works()->delete();
         if ($shift->type !== "open")
             $this->createWork($shift, $shiftNewData["related"]["id"]);
+        else
+            $shift->Roles()->sync(collect($shiftNewData["related"])->pluck("id")->toArray());
         return $shift;
     }
 

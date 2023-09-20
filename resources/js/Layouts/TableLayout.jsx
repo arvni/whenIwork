@@ -47,7 +47,7 @@ const TableLayout = ({
                            }
                        }}
                        sortModel={defaultValues.sort}
-                       rowsPerPageOptions={[10, 20, 100]}
+                       rowsPerPageOptions={[100,50 ,20, 10]}
                        pageSize={defaultValues.pageSize * 1}
                        onPageSizeChange={handlePageSizeChange}
                        onPageChange={handlePageChange}

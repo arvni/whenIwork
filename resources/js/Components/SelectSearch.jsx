@@ -19,17 +19,14 @@ const SelectSearch = forwardRef(({
     const [options, setOptions] = useState([]);
     const [search, setSearch] = useState("");
     useEffect(() => {
-        if (search)
-            listOptions();
+        listOptions();
     }, [search]);
     const handleSearch = (e) => setSearch(e ? e.target.value ?? "" : "");
     const listOptions = async () => {
-        if (search) {
-            setLoading(true);
-            const {data} = await axios.get(url + '/?search=' + toPersianChars(search));
-            setOptions(data.data);
-            setLoading(false);
-        }
+        setLoading(true);
+        const {data} = await axios.get(url + '/?search=' + (search ? toPersianChars(search) : ""));
+        setOptions(data.data);
+        setLoading(false);
     }
 
     const handleChange = (e, v) => {
@@ -37,7 +34,7 @@ const SelectSearch = forwardRef(({
     };
 
     return <Autocomplete name={name} isOptionEqualToValue={(option, value) => option.id === value?.id}
-                         disabled={disabled} filterOptions={(opt) => opt} id={"select-search-input"}
+                         disabled={disabled} id={"select-search-input"}
                          getOptionLabel={(option) => option ? option.name : ""} noOptionsText={"هیچ دیتایی یافت نشد"}
                          loadingText={"درحال جستجو"}
                          value={value ? value : multiple ? [] : value}

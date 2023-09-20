@@ -1,7 +1,7 @@
-import { useState} from "react";
+import {useState} from "react";
 import {Head, useForm} from "@inertiajs/inertia-react";
 import {GridActionsCellItem} from "@mui/x-data-grid";
-import {Delete as DeleteIcon, Edit as EditIcon, RemoveRedEye} from "@mui/icons-material";
+import {Edit as EditIcon, RemoveRedEye} from "@mui/icons-material";
 import TableLayout from "@/Layouts/TableLayout";
 import DeleteForm from "@/Components/DeleteForm";
 import Filter from "./Components/Filter";
@@ -9,6 +9,7 @@ import Filter from "./Components/Filter";
 import AddForm from "@/Pages/Admin/Room/Components/Form";
 import {Inertia} from "@inertiajs/inertia";
 import AdminLayout from "@/Layouts/AdminLayout";
+import {fetchData} from "@/Services/fetchData";
 
 const breadCrumbs = [
     {
@@ -21,11 +22,10 @@ const breadCrumbs = [
 const Index = ({rooms, status, success, defaultValues}) => {
     const {data, setData, post, processing, reset, errors, get} = useForm({
         name: "",
-        department: null,
-        managers: []
+        department: null
     });
-    const [openDestroy, setOpenDestroy] = useState(false);
     const [openAddForm, setOpenAddForm] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const columns = [
         {field: 'name', headerName: 'نام', type: "string", width: 250},
@@ -41,24 +41,28 @@ const Index = ({rooms, status, success, defaultValues}) => {
             type: 'actions',
             width: 100,
             sortable: false,
-            renderCell: ({value, row}) => ([
-                <GridActionsCellItem key={`show-${value}`} icon={<RemoveRedEye color={"info"}/>} label="نمایش"
-                                     onClick={show(value)}/>
-            ])
+            renderCell: (params) => ([<GridActionsCellItem icon={<RemoveRedEye color={"info"}/>} label="نمایش"
+                                                           onClick={show(params.row.id)}
+                                                           href={route("admin.rooms.show", [params.row.id])}/>,
+                <GridActionsCellItem icon={<EditIcon color={"warning"}/>} label="بروزرسانی"
+                                     onClick={edit(params.row.id)}/>])
         }
     ];
 
 
     const edit = (id) => () => {
-        console.log(id)
-    };
-    const destroy = (params) => () => {
-        setData({...params, _method: "delete"});
-        setOpenDestroy(true);
+        setLoading(true);
+        fetchData(route("admin.roomApi.show", id)).then(res => {
+            setData({...res, _method: "put"});
+        }).catch((err) => {
+            console.error(err);
+        }).finally(() => {
+            setOpenAddForm(true);
+            setLoading(false);
+        });
     };
 
-    const cancelDelete = () => {
-        setOpenDestroy(false);
+    const cancel = () => {
         setOpenAddForm(false);
         reset();
     }
@@ -70,7 +74,7 @@ const Index = ({rooms, status, success, defaultValues}) => {
 
     const successCb = () => {
         reset();
-        cancelDelete();
+        cancel();
     }
 
     const show = (id) => () => get(route('admin.rooms.show', id));
@@ -88,7 +92,7 @@ const Index = ({rooms, status, success, defaultValues}) => {
     };
 
     const handleSubmit = () => {
-        post(data.id ? route('admin.rooms.store') : route('admin.rooms.update', data.id), {
+        post(data.id ? route('admin.rooms.update', data.id) : route('admin.rooms.store'), {
             onSuccess: handleCancel
         });
     }
@@ -103,8 +107,6 @@ const Index = ({rooms, status, success, defaultValues}) => {
             <TableLayout defaultValues={defaultValues} addNew onClickAddNew={handleAddNew} addNewTitle={"افزودن کاربر"}
                          loading={processing} success={success} status={status} errors={errors} data={rooms}
                          only={["rooms"]} Filter={Filter} columns={columns} processing={processing} reload={reload}>
-                <DeleteForm title={`بخش ${data?.name}`} openDelete={openDestroy} disAgreeCB={cancelDelete}
-                            agreeCB={deleteRoom}/>
                 <AddForm values={data} errors={errors} setValues={setData} loading={processing} submit={handleSubmit}
                          cancel={handleCancel} open={openAddForm}/>
             </TableLayout>
