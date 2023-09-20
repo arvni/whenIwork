@@ -33,5 +33,6 @@ return [
     "admin.departments.show" => "مشاهده دپارتمان ",
     "admin.departments.edit" => "بروزرسانی دپارتمان",
     "admin.departments.destroy" => "حذف دپارتمان",
-    "admin.Department.*"=>"hello"
+    "admin.Department.*"=>"hello",
+    "admin.users.leaves"=>"تایید مرخصی"
 ];
