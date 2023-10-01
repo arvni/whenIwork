@@ -30,7 +30,6 @@ RUN set -xe \
 
 WORKDIR /app
 ENV COMPOSER_ALLOW_SUPERUSER 1
-COPY laravel-worker.ini /etc/supervisor.d/
 
 EXPOSE 8000
 COPY package.json ./
@@ -38,8 +37,4 @@ RUN npm i
 COPY . .
 RUN composer install
 RUN npm run build
-CMD supervisord -c /etc/supervisord.conf \
-    && supervisorctl reread \
-    && supervisorctl update \
-    && supervisorctl start "laravel-worker:*"
 CMD php artisan serv --host=0.0.0.0 --port=8000
