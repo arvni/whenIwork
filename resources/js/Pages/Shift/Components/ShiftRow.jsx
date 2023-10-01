@@ -31,7 +31,7 @@ const ShiftRow = ({shift, onShow, onEdit, onDelete, day, index, onPublish}) => {
                     </IconButton>
                     {new Date(day.date) - new Date(new Date().toDateString()) > 0 ? <>
                         {!shift.isActive && <IconButton color={"info"} onClick={onPublish(shift.id)}
-                                                        title={"چاپ شبفت"}>
+                                                        title={"اعلان شبفت"}>
                             <AssignmentTurnedInIcon/>
                         </IconButton>}
                         <IconButton color={"warning"} onClick={onEdit(shift.id)}

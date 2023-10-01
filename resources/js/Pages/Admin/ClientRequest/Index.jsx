@@ -5,7 +5,7 @@ import {Head, useForm, usePage} from "@inertiajs/inertia-react";
 import {convertDateTime} from "@/Services/helper";
 
 import {IconButton, Stack} from "@mui/material";
-import { Close, Done} from '@mui/icons-material';
+import {Close, Done} from '@mui/icons-material';
 
 
 import TableLayout from "@/Layouts/TableLayout";
@@ -20,7 +20,6 @@ import {renderStatus} from "@/Pages/Shift/Components/ExpandedComponent";
 import {requestTypes} from "@/Pages/ClientRequest";
 
 
-
 const Index = () => {
     const {post, setData, data, reset, processing} = useForm();
     const {clientRequests, status, errors, auth, success, defaultValues} = usePage().props;
@@ -31,7 +30,7 @@ const Index = () => {
             type: "string",
             flex: 1,
             sortable: false,
-            renderCell: ({row}) => row.user.name
+            renderCell: ({row}) => <a href="#" onClick={showUser(row.user.id)}>{row.user.name}</a>
         },
         {
             field: 'type',
@@ -93,7 +92,7 @@ const Index = () => {
             flex: .2,
             renderCell: ({row}) => {
                 let cols = []
-                if (row.status === "waiting" && new Date() < new Date(row.requestable?.date ?? row.requestable?.started_at)) {
+                if (row.status === "waiting" && new Date() < new Date(row.requestable?.date ? row.requestable?.date + " " + row.requestable?.started_at : row.requestable?.started_at)) {
                     cols.push(<Stack direction={"row"} gap={1}>
                         <IconButton onClick={handleReject(row.id)} color={"error"} title={"رد"}>
                             <Close/>
@@ -123,6 +122,8 @@ const Index = () => {
         setOpenReject(false);
         reset();
     }
+
+    const showUser = (id) => () => Inertia.visit(route("admin.users.show", id));
 
     const getDataRequestData = (id) => {
         setData(clientRequests.data.find((item) => item.id === id));

@@ -20,6 +20,7 @@ import ConfirmForm from "@/Pages/Admin/Shift/Components/ConfirmForm";
 import RejectForm from "@/Pages/Admin/Shift/Components/RejectForm";
 import ClientLayout from "@/Layouts/ClientLayout";
 import {renderStatus} from "@/Pages/Shift/Components/ExpandedComponent";
+import DeleteForm from "@/Components/DeleteForm";
 
 
 export const requestTypes = new Map([
@@ -103,7 +104,7 @@ const Index = () => {
             renderCell: (params) => {
                 let cols = []
 
-                if (params.row.status === "waiting" && new Date()<new Date(params?.row?.requestable?.date)) {
+                if (params.row.status === "waiting" && new Date() < new Date(params?.row?.requestable?.date)) {
                     if (auth.user.id === params.row.user.id && params.row.status === "waiting") {
                         cols.push(<IconButton key={"edit-" + params.value} title="بروررسانی"
                                               onClick={editClientRequest(params.row)}
@@ -115,7 +116,6 @@ const Index = () => {
                             <DeleteIcon/>
                         </IconButton>);
                     }
-                    console.log(defaultValues?.filters?.type);
                     if (defaultValues?.filters?.type === "revised")
                         cols.push(<Stack direction={"row"} gap={1}>
                             <IconButton onClick={handleReject(params.value)} color={"error"} title={"رد"}>
@@ -220,7 +220,7 @@ const Index = () => {
 
     return (
         <>
-            <Head title={"لیست درخواست ها"} />
+            <Head title={"لیست درخواست ها"}/>
             <TableLayout defaultValues={defaultValues} success={success} status={status} reload={pageReload}
                          columns={columns} data={clientRequests} rowHeight={100}
                          addNew={defaultValues?.filters?.type === "takeLeave"}
@@ -233,6 +233,8 @@ const Index = () => {
             <ConfirmForm onConfirm={confirm} onClose={handleClose} open={openConfirm} request={data}/>
             <RejectForm onChange={handleChange} onSubmit={reject} onClose={handleClose} open={openReject}
                         request={data}/>
+            <DeleteForm title={"درخواست"} openDelete={openDeleteForm} disAgreeCB={handleCloseDeleteForm}
+                        agreeCB={handleDestroy}/>
         </>);
 }
 const breadCrumbs = [
