@@ -14,7 +14,7 @@ ENV MEMCACHED_DEPS zlib-dev libmemcached-dev cyrus-sasl-dev
 
 
 RUN docker-php-ext-configure zip
-RUN docker-php-ext-configure gd
+RUN docker-php-ext-configure gd --enable-gd
 RUN docker-php-ext-configure sodium
 RUN docker-php-ext-install -j$(nproc) gd
 
