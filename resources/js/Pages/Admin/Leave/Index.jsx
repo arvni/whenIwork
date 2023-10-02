@@ -13,7 +13,7 @@ import ConfirmForm from "@/Pages/Admin/Shift/Components/ConfirmForm";
 import RejectForm from "@/Pages/Admin/Shift/Components/RejectForm";
 
 import {convertDate, convertDateTime} from "@/Services/helper";
-import {requestTypes} from "@/Pages/ClientRequest";
+import {requestTypes} from "@/Pages/ClientRequest/Index";
 
 const Index = ({leaves, status, success, errors, requestInputs}) => {
     const {post, setData, data, reset, processing, get} = useForm()

@@ -17,7 +17,7 @@ import ExpandedComponent from "./Components/ExpandedComponent";
 import ConfirmForm from "@/Pages/Admin/Shift/Components/ConfirmForm";
 import RejectForm from "@/Pages/Admin/Shift/Components/RejectForm";
 import {renderStatus} from "@/Pages/Shift/Components/ExpandedComponent";
-import {requestTypes} from "@/Pages/ClientRequest";
+import {requestTypes} from "@/Pages/ClientRequest/Index";
 
 
 const Index = () => {

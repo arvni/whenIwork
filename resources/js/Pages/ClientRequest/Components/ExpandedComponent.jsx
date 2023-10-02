@@ -1,6 +1,6 @@
 import {Table, TableBody, TableCell, TableHead, TableRow} from "@mui/material";
 import {convertDate, convertDateTime, persianNumber} from "@/Services/helper";
-import {requestTypes} from "@/Pages/ClientRequest";
+import {requestTypes} from "@/Pages/ClientRequest/Index";
 
 const ExpandedComponent = ({data: requestable}) => {
     return requestable && <Table>

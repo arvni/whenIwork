@@ -5,7 +5,7 @@ import {convertDateTime} from "@/Services/helper";
 import {useForm} from "@inertiajs/inertia-react";
 import CancelRequest from "@/Pages/Shift/Components/CancelRequest";
 import {useState} from "react";
-import {requestTypes} from "@/Pages/ClientRequest";
+import {requestTypes} from "@/Pages/ClientRequest/Index";
 
 export const statuses = new Map([["waiting", <AccessTimeIcon color={"warning"}/>],
     ["rejected", <Cancel color={"error"}/>],

@@ -6,16 +6,16 @@ RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
 
 # Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
+RUN apk add --no-cache --update libmemcached-libs zlib libzip-dev libpng-dev libsodium libsodium-dev
 # packages
-RUN docker-php-ext-install mysqli pdo_mysql
+RUN docker-php-ext-install mysqli pdo_mysql sodium zip
 # memcached
 ENV MEMCACHED_DEPS zlib-dev libmemcached-dev cyrus-sasl-dev
 
-RUN apk add --no-cache --update libmemcached-libs zlib libzip-dev libpng-dev supervisor
 
 RUN docker-php-ext-configure zip
 RUN docker-php-ext-configure gd
+RUN docker-php-ext-configure sodium
 RUN docker-php-ext-install -j$(nproc) gd
 
 
@@ -32,9 +32,8 @@ WORKDIR /app
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
 EXPOSE 8000
-COPY package.json ./
-RUN npm i
 COPY . .
+RUN npm i
 RUN composer install
-RUN npm run build
+RUN npm run build -f
 CMD php artisan serv --host=0.0.0.0 --port=8000
