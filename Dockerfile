@@ -12,11 +12,11 @@ RUN docker-php-ext-install mysqli pdo_mysql sodium zip
 # memcached
 ENV MEMCACHED_DEPS zlib-dev libmemcached-dev cyrus-sasl-dev
 
-
+RUN apk add freetype-dev
 RUN docker-php-ext-configure zip
-RUN docker-php-ext-configure gd --enable-gd  --with-jpeg-dir
+RUN docker-php-ext-configure gd --with-jpeg --with-freetype --enable-gd
 RUN docker-php-ext-configure sodium
-RUN docker-php-ext-install -j$(nproc) gd --enable-gd --with-jpeg-dir
+RUN docker-php-ext-install -j$(nproc) gd
 
 
 RUN set -xe \
