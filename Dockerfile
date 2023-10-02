@@ -6,7 +6,7 @@ RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
 
 # Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN apk add --no-cache --update libmemcached-libs zlib libzip-dev libpng-dev libsodium libsodium-dev  libjpeg-dev
+RUN apk add --no-cache --update libmemcached-libs zlib libzip-dev libpng-dev libsodium libsodium-dev  jpeg-dev
 # packages
 RUN docker-php-ext-install mysqli pdo_mysql sodium zip
 # memcached
