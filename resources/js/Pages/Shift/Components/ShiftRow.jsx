@@ -7,13 +7,18 @@ import {
 } from "@mui/icons-material";
 import PoperWraper from "@/Components/PoperWraper";
 
+const ShiftTypes={
+    open:"باز",
+    normal:"نرمال",
+}
+
 const ShiftRow = ({shift, onShow, onEdit, onDelete, day, index, onPublish}) => {
     return <>
         <TableRow>
             <TableCell>{index + 1}</TableCell>
             <TableCell>{shift.started_at.substr(0, shift.started_at.length - 3)}</TableCell>
             <TableCell>{shift.ended_at.substr(0, shift.ended_at.length - 3)}</TableCell>
-            <TableCell>{shift.type}</TableCell>
+            <TableCell>{ShiftTypes[shift.type]}</TableCell>
             <TableCell>{shift.noUsers}</TableCell>
             <TableCell>
                 <PoperWraper component={<Typography>{shift.client_requests_count}</Typography>}>
