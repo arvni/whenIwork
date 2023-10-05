@@ -16,6 +16,11 @@ const Dashboard = ({events, sumShifts, sumLeaves, ...props}) => {
             only: ["events", "sumShifts", "sumLeaves"]
         })
     }
+    const convertedEvents=events.map(item => ({
+        ...item,
+        start: new Date(item.start),
+        end: new Date(item.end),
+    }));
     return (<>
             <Head title="داشبورد"/>
             <Greetings user={props.auth.user.name}/>
@@ -30,11 +35,7 @@ const Dashboard = ({events, sumShifts, sumLeaves, ...props}) => {
                 </p>
 
             </Stack>
-            <FullCalendar onNavigate={handleNavigate} events={events.map(item => ({
-                ...item,
-                start: new Date(item.start),
-                end: new Date(item.end),
-            }))}/>
+            <FullCalendar onNavigate={handleNavigate} events={convertedEvents}/>
         </>
     );
 }

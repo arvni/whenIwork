@@ -5,9 +5,7 @@ namespace App\Services;
 use App\Interfaces\RepositoryInterface;
 use App\Interfaces\ShiftRepositoryInterface;
 use App\Models\User;
-use App\Repositories\BaseRepository;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Morilog\Jalali\Jalalian;
 
@@ -67,9 +65,9 @@ class CalendarService
     protected function convertLeavesToEvents($leaves)
     {
         return $leaves->map(fn($leave) => [
-            "title" => "مرخصی : " . __("messages." . $leave->type),
-            "start" => Carbon::parse($leave->started_at, "Asia/Tehran")->addMinutes(30)->format("Y-m-d H:i:s"),
-            "end" => Carbon::parse($leave->ended_at, "Asia/Tehran")->addMinutes(30)->format("Y-m-d H:i:s"),
+            "title" => ($leave->status === "accepted" ? "مرخصی : " : "درخواست مرخصی : ") . __("messages." . $leave->type),
+            "start" => Carbon::parse($leave->started_at)->format("Y-m-d H:i:s"),
+            "end" => Carbon::parse($leave->ended_at)->format("Y-m-d H:i:s"),
             "id" => "leave-$leave->id",
             "className" => $leave->status == "accepted" ? "leave" : "waiting"
         ])->toArray();
@@ -105,7 +103,7 @@ class CalendarService
             $userId = auth()->user()->id;
         }
 
-        return $query->listAll(["filters" => ["date" => $range, "user_id" => $userId, "status" => ["accepted", "waiting"]], "sort" => ["field" => $sortField, "sort" => "desc"]]);
+        return $query->listAll(["filters" => ["date" => $range, "user_id" => $userId, "status" => ["accepted", "waiting"], "active" => true], "sort" => ["field" => $sortField, "sort" => "desc"]]);
     }
 
 

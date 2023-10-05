@@ -33,8 +33,8 @@ class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface
             $leave->ended_at = Carbon::parse($data["date"])->setTime(...explode(":", $data["range"]["to"]));
         } else {
             list($started_at, $ended_at) = $data["range"];
-            $leave->started_at = Carbon::parse($started_at);
-            $leave->ended_at = Carbon::parse($ended_at);
+            $leave->started_at = Carbon::parse($started_at)->startOfDay();
+            $leave->ended_at = Carbon::parse($ended_at)->endOfDay();
         }
 
         $leave->User()->associate(auth()->user()->id);

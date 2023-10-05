@@ -26,7 +26,7 @@ class CalculateUserHours
 
     public function calculateSumOfShiftsHours($user_id, $date = null)
     {
-        $shifts = $this->shiftRepository->listAll(["filters" => ["date" => $this->dateRangeProvider($this->convertDateTimeStringToCarbon($date)), "user_id" => $user_id]]);
+        $shifts = $this->shiftRepository->listAll(["filters" => ["date" => $this->dateRangeProvider($this->convertDateTimeStringToCarbon($date)), "user_id" => $user_id,"active"=>true]]);
         return $this->sumShifts($shifts);
     }
 
@@ -58,7 +58,7 @@ class CalculateUserHours
 
     private function convertDateTimeStringToCarbon($dateTime)
     {
-        return Carbon::parse($dateTime, "Asia/Tehran");
+        return Carbon::parse($dateTime);
     }
 
     public function dateRangeProvider($date): array

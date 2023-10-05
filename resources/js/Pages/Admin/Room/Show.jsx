@@ -196,7 +196,7 @@ const Show = () => {
                 submit={handleSubmit}
                 cancel={closeAddShiftForm}
                 clearErrors={clearErrors}
-                title={data.id ? "بروزرسانی شیفت" : "افزودن شیفت"}
+                title={data.id ? "ویرایش شیفت" : "افزودن شیفت"}
             />
             <DeleteForm title={data.date} openDelete={openDeleteShift && !processing} disAgreeCB={handleCloseDeleteForm}
                         agreeCB={deleteShift}/>

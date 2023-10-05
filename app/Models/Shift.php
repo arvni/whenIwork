@@ -30,9 +30,9 @@ class Shift extends Model
     }
 
     //Scopes
-    public function scopeActive($query)
+    public function scopeActive($query, $isActive = true)
     {
-        return $query->where("isActive", true);
+        return $query->where("isActive", $isActive);
     }
 
 

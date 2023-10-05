@@ -104,6 +104,9 @@ class ShiftRepository extends BaseRepository implements ShiftRepositoryInterface
                 $q->where("users.id", $filters["user_id"]);
             });
         }
+        if (isset($filters["active"])) {
+            $query->active($filters["active"]);
+        }
         return $query;
     }
 

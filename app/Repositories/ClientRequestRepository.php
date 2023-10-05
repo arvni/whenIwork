@@ -7,13 +7,9 @@ use App\Interfaces\LeaveRepositoryInterface;
 use App\Interfaces\PermissionRepositoryInterface;
 use App\Interfaces\ShiftRepositoryInterface;
 use App\Interfaces\UserRepositoryInterface;
-use App\Interfaces\WorkRepositoryInterface;
 use App\Models\ClientRequest;
 use App\Models\Leave;
-use App\Models\Role;
-use App\Models\User;
 use Illuminate\Support\Facades\Gate;
-use Spatie\Permission\Models\Permission;
 
 class ClientRequestRepository extends BaseRepository implements ClientRequestRepositoryInterface
 {

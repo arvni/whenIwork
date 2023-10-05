@@ -8,7 +8,7 @@ import UserForm from "./Components/Form";
 const Add = (props) => {
     const {data, setData, post, errors, processing} = useForm({
         name: "",
-        mobile: "",
+        mobileNo: "",
         email: "",
         avatar: "",
         roles: [],

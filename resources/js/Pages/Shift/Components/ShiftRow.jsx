@@ -40,7 +40,7 @@ const ShiftRow = ({shift, onShow, onEdit, onDelete, day, index, onPublish}) => {
                             <AssignmentTurnedInIcon/>
                         </IconButton>}
                         <IconButton color={"warning"} onClick={onEdit(shift.id)}
-                                    title={"بروزرسانی شیفت"}>
+                                    title={"ویرایش شیفت"}>
                             <EditIcon/>
                         </IconButton>
                         <IconButton color={"error"} onClick={onDelete(shift.id)}

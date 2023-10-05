@@ -35,8 +35,8 @@ const UserForm = ({values, setValues, cancel, loading, submit, errors, edit}) =>
                                onChange={handleChange} sx={{width: "100%"}}/>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                    <TextField error={Object.keys(errors).includes('mobile')} helperText={errors?.mobile ?? ""}
-                               label={"موبایل"} name={"mobile"} value={values.mobile} onChange={handleChange}
+                    <TextField error={Object.keys(errors).includes('mobileNo')} helperText={errors?.mobileNo ?? ""}
+                               label={"موبایل"} name={"mobileNo"} value={values.mobileNo} onChange={handleChange}
                                sx={{width: "100%"}}/>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
