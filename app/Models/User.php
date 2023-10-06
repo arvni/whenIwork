@@ -108,10 +108,4 @@ class User extends Authenticatable
     {
         return $this->morphMany(ClientRequest::class, "revisable_by");
     }
-
-    public function Role()
-    {
-
-    }
-
 }

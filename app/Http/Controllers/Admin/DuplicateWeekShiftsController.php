@@ -46,7 +46,6 @@ class DuplicateWeekShiftsController extends Controller
                     }
                 }]
         ]);
-
         $this->roomRepository->duplicateShifts($room, $request->get("date"));
 
         return $this->responseWithSuccess("شیفت ها با موفقیت ثبت شد لطفا برای نمایش شیفت ها اقدام کنید");

@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ShiftRepositoryInterface;
 use App\Models\Shift;
+use App\Models\User;
+use App\Notifications\ShiftPublished;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class ShiftPublishController extends Controller
 {
@@ -29,6 +31,20 @@ class ShiftPublishController extends Controller
     {
         $this->authorize("publish", $shift);
         $this->shiftRepository->publish($shift);
-        return $this->responseWithSuccess(__("messages,successfullyPublished"));
+        $this->notifyUsers($shift);
+        return $this->responseWithSuccess(__("messages.successfullyPublished"));
+    }
+
+    private function notifyUsers(Shift $shift)
+    {
+        if ($shift->type == "open") {
+            $roles = $shift->Roles;
+            $users = collect();
+            foreach ($roles as $role) {
+                $users->push(User::role($role->name)->get());
+            }
+        } else
+            $users = $shift->users;
+        Notification::send($users, new ShiftPublished($shift));
     }
 }

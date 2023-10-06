@@ -123,6 +123,7 @@ class RoomRepository extends BaseRepository implements RoomRepositoryInterface
 
     public function findById($id)
     {
+
         return $this->model->find($id);
     }
 
@@ -171,18 +172,27 @@ class RoomRepository extends BaseRepository implements RoomRepositoryInterface
 
     public function duplicateShifts(Room $room, array $date)
     {
-        list($from,$to)=$date;
-        $fromDate=Carbon::parse($from,"Asia/Tehran")->subDays(7)->toDate();
-        $toDate=Carbon::parse($to,"Asia/Tehran")->subDays(7)->toDate();
-        $shifts=$room->Shifts()->whereBetween("date",[$fromDate,$toDate])->with(["roles:id","works"])->get();
-        foreach ($shifts as $shift){
-            $newShift=$shift->replicate();
-            $newShift->date=Carbon::parse($shift->date)->addDays(7);
+        list($from, $to) = $date;
+        $fromDate = Carbon::parse($from, "Asia/Tehran")->subDays(7)->toDate();
+        $toDate = Carbon::parse($to, "Asia/Tehran")->subDays(7)->toDate();
+        $shifts = $room->Shifts()->whereBetween("date", [$fromDate, $toDate])->with(["roles:id", "works"])->get();
+        foreach ($shifts as $shift) {
+            $newShift = $shift->replicate();
+            $newShift->date = Carbon::parse($shift->date)->addDays(7);
+            $newShift->isActive = false;
             $newShift->save();
-            if ($shift->type==="open"){
+            if ($shift->type === "open") {
                 $newShift->Roles()->sync($shift->Roles->pluck("id")->toArray());
-            } else{
-                $newShift->Works()->sync($shift->Works->pluck("id")->toArray());
+            } else {
+                $newShift->Works()->SaveMany($shift->Works->map(function ($work) {
+                    unset($work->id);
+                    unset($work->shift_id);
+                    unset($work->accepted);
+                    unset($work->created_at);
+                    unset($work->updated_at);
+                    unset($work->changed);
+                    return $work;
+                }));
             }
         }
     }

@@ -9,7 +9,7 @@ import PoperWraper from "@/Components/PoperWraper";
 
 const ShiftTypes={
     open:"باز",
-    normal:"نرمال",
+    normal:"موظفی",
 }
 
 const ShiftRow = ({shift, onShow, onEdit, onDelete, day, index, onPublish}) => {

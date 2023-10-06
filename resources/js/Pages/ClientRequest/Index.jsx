@@ -22,7 +22,7 @@ import ClientLayout from "@/Layouts/ClientLayout";
 import {renderStatus} from "@/Pages/Shift/Components/ExpandedComponent";
 import DeleteForm from "@/Components/DeleteForm";
 
-
+//@todo change to translate file
 export const requestTypes = new Map([
     ["shift", "درخواست شیفت"],
     ["changeUser", "درخواست جابه جایی شیفت"],

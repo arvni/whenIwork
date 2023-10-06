@@ -28,12 +28,16 @@ RUN set -xe \
     && rm -rf /tmp/* \
     && apk del .memcached-deps .phpize-deps
 
-WORKDIR /app
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
 EXPOSE 8000
-COPY . .
+WORKDIR /app
+COPY ./package.json ./package.json
 RUN npm i
+COPY . .
 RUN composer install
 RUN npm run build -f
-CMD php artisan serv --host=0.0.0.0 --port=8000
+COPY . .
+COPY start.sh /usr/local/bin/start
+RUN chmod u+x /usr/local/bin/start
+CMD ["/usr/local/bin/start"]
