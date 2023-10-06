@@ -88,7 +88,7 @@ const Form = ({values, setValues, cancel, submit, errors, open, loading, title, 
                     <Grid item xs={7.5}
                           sx={{display: "flex", alignItems: "center", alignContent: "center", justifyContent: "start"}}>
                         <FormControlLabel
-                            control={<Switch leftLabel={"معمولی"} rightLabel={"باز"} checked={values.type === "open"}
+                            control={<Switch leftLabel={"موظفی"} rightLabel={"باز"} checked={values.type === "open"}
                                              onChange={handleTypeChange}/>}
                             label={<FormLabel>نوع شیفت</FormLabel>} labelPlacement={"top"}
                             sx={{alignItems: "center", justifyContent: "space-between", width: "100%", margin: 0}}/>
