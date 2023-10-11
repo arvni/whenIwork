@@ -8,7 +8,7 @@ import {
     Button, FormControl, InputLabel, Select, MenuItem, FormGroup, Stack,
 } from "@mui/material";
 import {useState} from "react";
-import {requestTypes} from "@/Pages/ClientRequest";
+import {requestTypes} from "@/Pages/ClientRequest/Index";
 
 const Filter = ({defaultFilter, onFilter}) => {
     const [filter, setFilter] = useState(defaultFilter);
