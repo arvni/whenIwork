@@ -111,7 +111,7 @@ const Index = () => {
     const [openConfirm, setOpenConfirm] = useState(false);
     const [openReject, setOpenReject] = useState(false);
 
-    const pageReload = (page, filters, sort, pageSize) => Inertia.visit(route('client.clientRequests.index'), {
+    const pageReload = (page, filters, sort, pageSize) => Inertia.visit(route('admin.clientRequests.index'), {
         only: ["clientRequests", "status", "defaultValues"],
         data: {page, filters, sort, pageSize},
         preserveState: true,

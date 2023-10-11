@@ -41,10 +41,7 @@ class ClientRequestRepository extends BaseRepository implements ClientRequestRep
             }
             $q->orWhere(fn($qu) => $this->applyAllowedRooms($qu));
         })->withAggregate("user", "name");
-
-        if (isset(optional($queryData["filters"])["date"])) {
-            $this->query->whereBetween("created_at", $queryData["filters"]["date"]);
-        }
+        $this->applyFilters($this->query, $queryData["filters"]);
 
         $this->applyOrderBy($this->query, $queryData["sort"]);
         return fn() => $this->applyPaginate($this->query, $queryData["pageSize"]);
@@ -83,14 +80,30 @@ class ClientRequestRepository extends BaseRepository implements ClientRequestRep
 
     protected function applyFilters($query, $filters)
     {
-        if (isset($filters["type"]) && $filters["type"] === "revised") {
-            $query->where("revisable_by_id", auth()->user()->id)->where("type", "changeUser");
-        } else if (isset($filters["type"])) {
-            $query->where("user_id", auth()->user()->id)->where("type", $filters["type"]);
-        } else
-            $query->where("user_id", auth()->user()->id)->where("type", "shift");
-        if (isset($filters["date"])) {
-            $query->whereBetween("created_at", $filters["date"]);
+        if (isset($filters["type"]) && $filters["type"] == "revised")
+            $query->where("revisable_by_id", auth()->user()->id);
+        elseif (debug_backtrace(0, 2)[1]["function"] === "list") {
+            $query->where("user_id", auth()->user()->id);
+        }
+        foreach ($filters as $key => $filter) {
+            if ($filter) {
+                switch ($key) {
+                    case "type":
+                        $query->where("type", $filters["type"]);
+                        break;
+                    case "date":
+                        $query->whereBetween("created_at", $filters["date"]);
+                        break;
+                    case "search":
+                        $query->whereHas("User", function ($q) use ($filter) {
+                            $q->search($filter);
+                        });
+                        break;
+                    case "status":
+                        $query->status($filter);
+                        break;
+                }
+            }
         }
         return $query;
     }

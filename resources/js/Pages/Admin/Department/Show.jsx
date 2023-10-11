@@ -92,11 +92,11 @@ const Index = () => {
 
     const showRoom = (id) => () => Inertia.visit(route("admin.rooms.show", id));
 
-    const pageReload = (page, filterModel, sort, pageSize) => Inertia.visit(route('admin.departments.show', department.id), {
+    const pageReload = (page, filters, sort, pageSize) => Inertia.visit(route('admin.departments.show', department.id), {
         data: {
-            page, filterModel, sort, pageSize
+            page, filters, sort, pageSize
         },
-        only: ["departments", "status", "defaultValues"],
+        only: ["department", "status", "defaultValues"],
         preserveState: true
     });
 

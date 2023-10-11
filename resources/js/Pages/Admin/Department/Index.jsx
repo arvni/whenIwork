@@ -68,9 +68,9 @@ const Index = ({departments, status, errors, defaultValues,success}) => {
         setData({...params,_method: "delete"});
         setOpenDeleteForm(true);
     };
-    const pageReload = (page, filterModel, sort, pageSize) => Inertia.visit(route('admin.departments.index'), {
+    const pageReload = (page, filters, sort, pageSize) => Inertia.visit(route('admin.departments.index'), {
         only: ["departments", "status", "defaultValues"],
-        data: {page, filterModel, sort, pageSize},
+        data: {page, filters, sort, pageSize},
         preserveState: true
     });
     const handleCloseDeleteForm = () => {

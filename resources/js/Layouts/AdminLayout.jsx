@@ -45,11 +45,6 @@ const AdminLayout=({auth, breadcrumbs, children})=>{
             permission: "admin.roles.index",
             icon: <ManageAccountsIcon/>
         },
-        {
-            title: "رفتن به منو کاربری",
-            href: "dashboard",
-            icon: <ArrowLeft/>
-        },
     ]
     return <Authenticated auth={auth} breadcrumbs={breadcrumbs} children={children} routes={routes}/>
 }

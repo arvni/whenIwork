@@ -10,6 +10,10 @@ const Filter = ({defaultFilter, onFilter}) => {
         setFilter(prevState => ({...prevState, type: v}));
         onFilter({...filter, type: v})();
     }
+    const handleFilter = (e) => {
+        e.preventDefault();
+        onFilter(filter);
+    }
     return (<>
             <Tabs onChange={handleTypeChange} value={filter?.type ?? "open"} sx={{marginBottom: "1rem"}} centered
                   title={"نوع شیفت"}>
@@ -21,20 +25,22 @@ const Filter = ({defaultFilter, onFilter}) => {
                     <FilterIcon/>فیلتر
                 </AccordionSummary>
                 <AccordionDetails>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={5}>
-                            <SelectSearch
-                                value={filter?.room}
-                                name={"room"}
-                                onChange={handleChange}
-                                url={route("roomsApi.index")}
-                                label={"بخش ها"}
-                            />
+                    <form action="#" onSubmit={handleFilter}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={5}>
+                                <SelectSearch
+                                    value={filter?.room}
+                                    name={"room"}
+                                    onChange={handleChange}
+                                    url={route("roomsApi.index")}
+                                    label={"بخش ها"}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={2} sx={{display: "flex"}} justifyContent={"center"}>
+                                <Button variant={"outlined"} type="submit">جستجو</Button>
+                            </Grid>
                         </Grid>
-                        <Grid item xs={12} sm={2} sx={{display: "flex"}} justifyContent={"center"}>
-                            <Button variant={"outlined"} onClick={onFilter(filter)}>جستجو</Button>
-                        </Grid>
-                    </Grid>
+                    </form>
                 </AccordionDetails>
             </Accordion>
         </>

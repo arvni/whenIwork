@@ -13,6 +13,7 @@ const SelectSearch = forwardRef(({
                                      helperText = "",
                                      error = false,
                                      disabled = false,
+                                     sx = {},
                                      ...props
                                  }, ref) => {
     const [loading, setLoading] = useState(false);
@@ -37,6 +38,7 @@ const SelectSearch = forwardRef(({
                          disabled={disabled} id={"select-search-input"}
                          getOptionLabel={(option) => option ? option.name : ""} noOptionsText={"هیچ دیتایی یافت نشد"}
                          loadingText={"درحال جستجو"}
+                         sx={sx}
                          value={value ? value : multiple ? [] : value}
                          onInputChange={handleSearch} multiple={multiple ?? false}
                          onChange={handleChange} disablePortal options={options ?? [value]}

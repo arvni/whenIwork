@@ -5,7 +5,7 @@ import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
-    Button,
+    Button, Stack,
 } from "@mui/material";
 import {useState} from "react";
 import SelectSearch from "@/Components/SelectSearch";
@@ -13,8 +13,9 @@ import SelectSearch from "@/Components/SelectSearch";
 const Filter = ({defaultFilter, onFilter}) => {
 
     const [filter, setFilter] = useState(defaultFilter);
-    const handleFilter = () => {
-        onFilter(filter)();
+    const handleFilter = e => {
+        e.preventDefault();
+        onFilter(filter);
     }
 
     const handleChange = (e) => {
@@ -25,19 +26,14 @@ const Filter = ({defaultFilter, onFilter}) => {
             <FilterIcon/> فیلتر
         </AccordionSummary>
         <AccordionDetails>
-            <Grid container spacing={2}>
-                <Grid item xs={12} sm={5}>
-                    <TextField sx={{width: "100%"}} name={"search"} value={filter?.search} onChange={handleChange}
-                               label={"شناسه یا نام"}/>
-                </Grid>
-                <Grid item xs={12} sm={5}>
+            <form action="#" onSubmit={handleFilter}>
+                <Stack spacing={2} direction="row">
+                    <TextField name={"search"} value={filter?.search} onChange={handleChange} label={"شناسه یا نام"}/>
                     <SelectSearch url={route("admin.roleApi.index")} value={filter?.role} onChange={handleChange}
-                                  name={"role"}/>
-                </Grid>
-                <Grid item xs={12} sm={2} sx={{display: "flex"}} justifyContent={"center"}>
-                    <Button variant={"outlined"} onClick={handleFilter}>فیلتر</Button>
-                </Grid>
-            </Grid>
+                                  name={"role"} label={"نقش"} sx={{minWidth:"125px"}}/>
+                    <Button variant={"outlined"} type="submit">فیلتر</Button>
+                </Stack>
+            </form>
         </AccordionDetails>
     </Accordion>
 }

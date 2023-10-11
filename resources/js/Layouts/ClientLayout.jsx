@@ -1,5 +1,6 @@
 import Authenticated from "./AuthenticatedLayout";
 import {
+    ArrowLeft,
     ArrowRight,
     Dashboard as DashboardIcon,
 } from "@mui/icons-material";
@@ -8,9 +9,6 @@ import EditCalendarIcon from "@mui/icons-material/EditCalendar";
 import React from "react";
 
 const ClientLayout = ({auth, breadcrumbs, children}) => {
-    let isAdmin = false;
-    if (auth?.permissions?.length)
-        isAdmin = auth.permissions.map(item => /^admin\.*/.test(item)).reduce((a, b) => a || b, false)
 
     let routes = [
         {
@@ -29,14 +27,6 @@ const ClientLayout = ({auth, breadcrumbs, children}) => {
             icon: <EditCalendarIcon/>
         },
     ]
-
-    if (isAdmin) {
-        routes.push({
-            title: "رفتن به منو مدیریت",
-            href: "admin.dashboard",
-            icon: <ArrowRight/>
-        });
-    }
 
     return <Authenticated auth={auth} breadcrumbs={breadcrumbs} children={children} routes={routes}/>
 }

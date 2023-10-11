@@ -70,6 +70,7 @@ class DepartmentRepository implements DepartmentRepositoryInterface
     private function applyFilters($query, $filters)
     {
         if (isset($filters["search"])) {
+
             $query->where("name", "like", "%" . $filters["search"] . "%");
         }
     }

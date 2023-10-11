@@ -96,7 +96,7 @@ export default function Welcome(props) {
 
     const captchaReload = () => {
         get("/", {
-            preserveState:true,
+            preserveState: true,
             only: ["captchaSrc"]
         });
     }
@@ -121,17 +121,21 @@ export default function Welcome(props) {
                                     <Grid item xs={12} sm={12} md={6} sx={{pt: "1em"}}>
                                         <form onSubmit={handleSubmit} action={route("login")} method={"post"}>
                                             <Stack alignItems={"center"} sx={{maxWidth: "224px", mx: "auto"}}>
-                                                <TextField onChange={onHandleChange} margin="normal" required
-                                                           id="email" label="شناسه کاربری" size={"small"}
-                                                           error={errors.hasOwnProperty("userId")} fullWidth
-                                                           helperText={errors.hasOwnProperty("userId") ? errors.userId : ""}
-                                                           name="userId" autoComplete="email" autoFocus/>
-                                                <TextField onChange={onHandleChange} margin="normal" required
-                                                           name="password" label="رمز عبور" type="password"
-                                                           id="password"
-                                                           autoComplete="current-password" size={"small"} fullWidth
-                                                           error={errors.hasOwnProperty("password")} sx={{mt: "0"}}
-                                                           helperText={errors.hasOwnProperty("password") ? errors.password : ""}/>
+                                                <FormGroup>
+                                                    <TextField onChange={onHandleChange} margin="normal" required
+                                                               id="email" label="شناسه کاربری" size={"small"}
+                                                               error={errors.hasOwnProperty("userId")} fullWidth
+                                                               helperText={errors.hasOwnProperty("userId") ? errors.userId : ""}
+                                                               name="userId" autoComplete="email" autoFocus/>
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <TextField onChange={onHandleChange} margin="normal" required
+                                                               name="password" label="رمز عبور" type="password"
+                                                               id="password"
+                                                               autoComplete="current-password" size={"small"} fullWidth
+                                                               error={errors.hasOwnProperty("password")} sx={{mt: "0"}}
+                                                               helperText={errors.hasOwnProperty("password") ? errors.password : ""}/>
+                                                </FormGroup>
                                                 <FormGroup sx={{mt: "1em"}}>
                                                     <Stack direction={"row"} alignItems={"center"}
                                                            justifyContent={"center"}
@@ -142,14 +146,14 @@ export default function Welcome(props) {
                                                         <img src={props.captchaSrc}/>
                                                     </Stack>
                                                     <TextField onChange={onHandleChange} margin="normal" required
-                                                               fullWidth
                                                                inputMode={"numeric"} name="captcha" label="کد امنیتی"
                                                                size={"small"} sx={{maxWidth: "224px"}}
                                                                id="captcha" error={errors.hasOwnProperty("captcha")}
                                                                helperText={errors.hasOwnProperty("captcha") ? errors.captcha : ""}/>
                                                 </FormGroup>
                                                 <Button onClick={handleSubmit} variant="contained" sx={{mt: 3, mb: 2}}
-                                                        disabled={processing}>
+                                                        disabled={processing} type={"submit"}>
+
                                                     ورود
                                                 </Button>
                                             </Stack>

@@ -46,9 +46,9 @@ const Index = ({roles, status, defaultValues}) => {
         setData({_method: "delete"});
         setOpenDeleteForm(true);
     };
-    const pageReload = (page, filterModel, sort, pageSize) => {
+    const pageReload = (page, filters, sort, pageSize) => {
         Inertia.visit(route("admin.roles.index"), {
-            data: {filterModel, page, sort, pageSize},
+            data: {filters, page, sort, pageSize},
             only: ["roles", "defaultValues"],
             preserveState: true
         });

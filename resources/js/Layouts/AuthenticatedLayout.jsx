@@ -55,11 +55,13 @@ const cacheRtl = createCache({
 });
 
 
-export default function Authenticated({auth, breadcrumbs, children,routes}) {
+export default function Authenticated({auth, breadcrumbs, children, routes}) {
     const {post, data, setData, reset} = useForm();
     const [loading, setLoading] = useState(false);
     const [openChangePassword, setOpenChangePassword] = useState(false);
-    const handleVisit = (href, method = "get") => () => {
+    const handleVisit = (href, method = "get") => e => {
+        if (method === "get")
+            e.preventDefault();
         if (method === "post")
             post(route(href))
         else
