@@ -1,7 +1,5 @@
 import Authenticated from "./AuthenticatedLayout";
 import {
-    ArrowLeft,
-    ArrowRight,
     Dashboard as DashboardIcon,
 } from "@mui/icons-material";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
