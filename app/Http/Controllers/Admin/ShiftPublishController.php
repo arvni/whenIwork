@@ -7,9 +7,12 @@ use App\Interfaces\ShiftRepositoryInterface;
 use App\Models\Shift;
 use App\Models\User;
 use App\Notifications\ShiftPublished;
+use App\Rules\CheckUserShiftPublish;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Validator;
 
 class ShiftPublishController extends Controller
 {
@@ -24,11 +27,16 @@ class ShiftPublishController extends Controller
      * Handle the incoming request.
      *
      * @param Shift $shift
+     * @param Request $request
      * @return RedirectResponse
      * @throws AuthorizationException
      */
-    public function __invoke(Shift $shift)
+    public function __invoke(Shift $shift, Request $request)
     {
+        if ($shift->type==="normal") {
+            $validator = Validator::make(["shift" => $shift], ["shift" => new CheckUserShiftPublish()]);
+            $validator->validate();
+        }
         $this->authorize("publish", $shift);
         $this->shiftRepository->publish($shift);
         $this->notifyUsers($shift);

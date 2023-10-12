@@ -6,5 +6,6 @@ return [
     "unsuccessfulDeleted" => ":title را نمیتوانید حذف کنید",
     "daily" => "روزانه",
     "hourly" => "ساعتی",
+    "userHasShiftOrLeave" => "کاربر در تاریخ و زمان انتخابی شیفت یا مرخصی دارد ",
     "" => "",
 ];
