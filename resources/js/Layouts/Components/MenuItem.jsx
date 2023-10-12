@@ -21,11 +21,8 @@ const listItemStyle = {
 };
 
 const MenuItem = ({onClick, selected, ...props}) => {
-    const handleOnClick = (href) => (e) => {
-        e.preventDefault();
-        onClick(href)();
-    }
-    return <ListItemButton {...props} sx={listItemStyle} onClick={handleOnClick(props.href)} href={route(props.href)}>
+
+    return <ListItemButton {...props} sx={listItemStyle} onClick={onClick(props.href)} href={route(props.href)}>
 
         <ListItemIcon>
             {props.badge ? <Badge color="primary" badgeContent={props.badge}>
