@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Interfaces\RoomRepositoryInterface;
 use App\Repositories\RoomRepository;
 use App\Rules\CheckShiftRelated;
+use App\Rules\CheckUserShiftCreate;
 use App\Rules\TimeCheck;
 use Carbon\Carbon;
 use Closure;
@@ -43,7 +44,7 @@ class ShiftStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            "room.id" => ["required", "exists:rooms,id"],
+            "room.id" => ["required", "exists:rooms,id", new CheckUserShiftCreate],
             "date" => ["required", "date", "after_or_equal:today"],
             "started_at" => ["required", new TimeCheck("lt", "ended_at")],
             "ended_at" => ["required", new TimeCheck("gt", "started_at")],
