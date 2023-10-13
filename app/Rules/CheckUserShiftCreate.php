@@ -43,8 +43,7 @@ class CheckUserShiftCreate implements Rule, DataAwareRule
             })->where("type", "daily")->count()) {
                 return false;
             }
-
-            if ($user->Shifts()->whereDate("shifts.date", "=", $value["date"])->where(function ($q) use ($value) {
+            $query = $user->UnPublishedShifts()->whereDate("shifts.date", "=", $value["date"])->where(function ($q) use ($value) {
                 $q->where(function ($qu) use ($value) {
                     $qu->whereTime("shifts.ended_at", ">=", $value["started_at"])->whereTime("shifts.ended_at", "<=", $value["ended_at"]);
                 })->orWhere(function ($qu) use ($value) {
@@ -52,7 +51,10 @@ class CheckUserShiftCreate implements Rule, DataAwareRule
                 })->orWhere(function ($qu) use ($value) {
                     $qu->whereTime("shifts.started_at", "<=", $value["started_at"])->whereTime("shifts.ended_at", ">=", $value["ended_at"]);
                 });
-            })->count())
+            });
+            if (isset($this->data["id"]))
+                $query->whereNot("shifts.id", $this->data["id"]);
+            if ($query->count())
                 return false;
         }
         return true;

@@ -63,7 +63,7 @@ class ShiftRepository extends BaseRepository implements ShiftRepositoryInterface
     public function edit(Shift $shift, $shiftNewData)
     {
         $shift->Room()->associate($shiftNewData["room"]["id"]);
-        $shift->update($shiftNewData);
+        $shift->update([...$shiftNewData, "date" => Carbon::parse($shiftNewData["date"])->toDateString()]);
         $shift->Works()->delete();
         if ($shift->type !== "open")
             $this->createWork($shift, $shiftNewData["related"]["id"]);

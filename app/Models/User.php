@@ -87,6 +87,12 @@ class User extends Authenticatable
     }
 
 
+    public function UnPublishedShifts()
+    {
+        return $this->belongsToMany(Shift::class,"works");
+    }
+
+
     public function Leaves()
     {
         return $this->hasMany(Leave::class);
