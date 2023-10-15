@@ -184,7 +184,7 @@ class RoomRepository extends BaseRepository implements RoomRepositoryInterface
             if ($shift->type === "open") {
                 $newShift->Roles()->sync($shift->Roles->pluck("id")->toArray());
             } else {
-                $newShift->Works()->SaveMany($shift->Works->map(function ($work) {
+                $newShift->Works()->saveMany($shift->Works->map(function ($work) {
                     unset($work->id);
                     unset($work->shift_id);
                     unset($work->accepted);

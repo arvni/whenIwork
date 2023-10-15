@@ -18,7 +18,7 @@ class ShiftResource extends JsonResource
             "id" => $this->id,
             "ended_at" => $this->ended_at,
             "started_at" => $this->started_at,
-            "related" => $this->type == "open" ? $this->Roles : optional($this->Works[0])->User,
+            "related" => $this->type == "open" ? $this->Roles : (count($this->Works) ? optional($this->Works[0])->User : null),
             "type" => $this->type,
             "date" => $this->date,
             "noUsers" => $this->noUsers,
