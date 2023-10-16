@@ -35,9 +35,9 @@ class CheckUserShiftPublish implements Rule
 
         if ($user->Shifts()->active()->whereDate("shifts.date", "=", $value->date)->where(function ($q) use ($value) {
             $q->where(function ($qu) use ($value) {
-                $qu->whereTime("shifts.ended_at", ">=", $value->started_at)->whereTime("shifts.ended_at", "<=", $value->ended_at);
+                $qu->whereTime("shifts.ended_at", ">", $value->started_at)->whereTime("shifts.ended_at", "<=", $value->ended_at);
             })->orWhere(function ($qu) use ($value) {
-                $qu->whereTime("shifts.started_at", ">=", $value->started_at)->whereTime("shifts.started_at", "<=", $value->ended_at);
+                $qu->whereTime("shifts.started_at", ">=", $value->started_at)->whereTime("shifts.started_at", "<", $value->ended_at);
             })->orWhere(function ($qu) use ($value) {
                 $qu->whereTime("shifts.started_at", "<=", $value->started_at)->whereTime("shifts.ended_at", ">=", $value->ended_at);
             });
