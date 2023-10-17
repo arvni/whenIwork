@@ -7,6 +7,7 @@ use Illuminate\Contracts\Validation\Rule;
 
 class CheckUserShiftPublish implements Rule
 {
+    protected $msg="";
     /**
      * Create a new rule instance.
      *
@@ -30,6 +31,7 @@ class CheckUserShiftPublish implements Rule
         if ($user->Leaves()->where(function ($q) use ($value) {
             $q->whereDate("started_at", ">=", Carbon::parse($value->date)->toDate())->whereDate("ended_at", "<=", Carbon::parse($value->date)->toDate());
         })->where("type", "daily")->count()) {
+            $this->msg=__("messages.haveDailyLeaveOnThisDate");
             return false;
         }
 
@@ -41,8 +43,19 @@ class CheckUserShiftPublish implements Rule
             })->orWhere(function ($qu) use ($value) {
                 $qu->whereTime("shifts.started_at", "<=", $value->started_at)->whereTime("shifts.ended_at", ">=", $value->ended_at);
             });
-        })->count())
+        })->count()) {
+            $shift=$user->Shifts()->active()->whereDate("shifts.date", "=", $value->date)->where(function ($q) use ($value) {
+                $q->where(function ($qu) use ($value) {
+                    $qu->whereTime("shifts.ended_at", ">", $value->started_at)->whereTime("shifts.ended_at", "<=", $value->ended_at);
+                })->orWhere(function ($qu) use ($value) {
+                    $qu->whereTime("shifts.started_at", ">=", $value->started_at)->whereTime("shifts.started_at", "<", $value->ended_at);
+                })->orWhere(function ($qu) use ($value) {
+                    $qu->whereTime("shifts.started_at", "<=", $value->started_at)->whereTime("shifts.ended_at", ">=", $value->ended_at);
+                });
+            })->withAggregate("Room","name")->first();
+            $this->msg=__("messages.haveShiftOnThisDateRange",["room"=>$shift->room_name]);
             return false;
+        }
         return true;
     }
 
@@ -53,6 +66,6 @@ class CheckUserShiftPublish implements Rule
      */
     public function message()
     {
-        return __("messages.userHasShiftOrLeave");
+        return $ths->msg??__("messages.userHasShiftOrLeave");
     }
 }

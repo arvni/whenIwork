@@ -15,6 +15,7 @@ class CheckUserShiftCreate implements Rule, DataAwareRule
      * @var array<string, mixed>
      */
     protected $data = [];
+    protected $msg="";
 
     /**
      * Create a new rule instance.
@@ -41,6 +42,7 @@ class CheckUserShiftCreate implements Rule, DataAwareRule
             if ($user->Leaves()->where(function ($q) use ($value) {
                 $q->whereDate("started_at", ">=", Carbon::parse($value["date"])->toDate())->whereDate("ended_at", "<=", Carbon::parse($value["date"])->toDate());
             })->where("type", "daily")->count()) {
+                $this->msg=__("messages.haveDailyLeaveOnThisDate");
                 return false;
             }
             $query = $user->UnPublishedShifts()->whereDate("shifts.date", "=", $value["date"])->where(function ($q) use ($value) {
@@ -54,8 +56,12 @@ class CheckUserShiftCreate implements Rule, DataAwareRule
             });
             if (isset($this->data["id"]))
                 $query->whereNot("shifts.id", $this->data["id"]);
-            if ($query->count())
+            $count=$query->count();
+            if ($count) {
+                $shift=$query->withAggregate("Room","name")->first();
+                $this->msg=__("messages.haveShiftOnThisDateRange",["room"=>$shift->room_name]);
                 return false;
+            }
         }
         return true;
     }
@@ -67,7 +73,7 @@ class CheckUserShiftCreate implements Rule, DataAwareRule
      */
     public function message()
     {
-        return __("messages.userHasShiftOrLeave");
+        return $this->msg?? __("messages.userHasShiftOrLeave");
     }
 
     public function setData($data)
