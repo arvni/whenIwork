@@ -18,7 +18,7 @@ const Filter = ({defaultFilter, onFilter}) => {
             <Tabs onChange={handleTypeChange} value={filter?.type ?? "open"} sx={{marginBottom: "1rem"}} centered
                   title={"نوع شیفت"}>
                 <Tab value={"open"} label={<Typography fontWeight={800}>آزاد</Typography>}/>
-                <Tab value={"normal"} label={<Typography fontWeight={800}>عادی</Typography>}/>
+                <Tab value={"normal"} label={<Typography fontWeight={800}>موظفی</Typography>}/>
             </Tabs>
             <Accordion>
                 <AccordionSummary>
