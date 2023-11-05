@@ -19,6 +19,7 @@ import {
 
 import {Refresh} from "@mui/icons-material";
 import Copyright from "@/Layouts/Components/Copyright";
+import PasswordField from "@/Components/PasswordField";
 
 
 const theme = createTheme({
@@ -121,20 +122,17 @@ export default function Welcome(props) {
                                     <Grid item xs={12} sm={12} md={6} sx={{pt: "1em"}}>
                                         <form onSubmit={handleSubmit} action={route("login")} method={"post"}>
                                             <Stack alignItems={"center"} sx={{maxWidth: "224px", mx: "auto"}}>
-                                                <FormGroup>
+                                                <FormGroup s={{width:"100%"}}>
                                                     <TextField onChange={onHandleChange} margin="normal" required
-                                                               id="email" label="شناسه کاربری" size={"small"}
+                                                               inputProps={{style:{direction:"ltr"}}}
+                                                               id="userId" label="شناسه کاربری" size={"small"}
                                                                error={errors.hasOwnProperty("userId")} fullWidth
                                                                helperText={errors.hasOwnProperty("userId") ? errors.userId : ""}
-                                                               name="userId" autoComplete="email" autoFocus/>
+                                                               name="userId" autoComplete="userId" autoFocus/>
                                                 </FormGroup>
                                                 <FormGroup>
-                                                    <TextField onChange={onHandleChange} margin="normal" required
-                                                               name="password" label="رمز عبور" type="password"
-                                                               id="password"
-                                                               autoComplete="current-password" size={"small"} fullWidth
-                                                               error={errors.hasOwnProperty("password")} sx={{mt: "0"}}
-                                                               helperText={errors.hasOwnProperty("password") ? errors.password : ""}/>
+                                                    <PasswordField onChange={onHandleChange}
+                                                               name="password" label="رمز عبور" error={errors?.password} />
                                                 </FormGroup>
                                                 <FormGroup sx={{mt: "1em"}}>
                                                     <Stack direction={"row"} alignItems={"center"}
