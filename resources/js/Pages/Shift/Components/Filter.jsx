@@ -5,7 +5,10 @@ import SelectSearch from "@/Components/SelectSearch";
 
 const Filter = ({defaultFilter, onFilter}) => {
     const [filter, setFilter] = useState(defaultFilter);
-    const handleChange = (e) => setFilter(prevState => ({...prevState, room: e.target.value}));
+    const handleChange = (e) => {
+        setFilter(prevState => ({...prevState, room: e.target.value}));
+        onFilter({...filter,room:e.target.value});
+    }
     const handleTypeChange = (_, v) => {
         setFilter(prevState => ({...prevState, type: v}));
         onFilter({...filter, type: v})();

@@ -118,6 +118,11 @@ class RoomRepository extends BaseRepository implements RoomRepositoryInterface
         if (isset($filters["date"])) {
             $query->whereBetween("date", $filters["date"]);
         }
+        if (isset($filters["department"])){
+            $query->whereHas("Department",function ($q)use($filters){
+                $q->where("id",$filters["department"]["id"]);
+            });
+        }
         return $query;
     }
 

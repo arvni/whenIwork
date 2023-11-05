@@ -20,6 +20,7 @@ const Filter = ({defaultFilter, onFilter}) => {
 
     const handleChange = (e) => {
         setFilter(prevState => ({...prevState, [e.target.name]: e.target.value ?? ""}));
+        onFilter({...filter,[e.target.name]:e.target.value});
     };
     return <Accordion sx={{width: "100%"}}>
         <AccordionSummary>

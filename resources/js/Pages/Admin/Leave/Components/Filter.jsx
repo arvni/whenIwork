@@ -13,6 +13,7 @@ const Filter = ({filter, setFilter, onFilter}) => {
     const handleChange = (e) => {
 
         setFilter(prevState => ({...prevState, search: e.target.value}))
+        onFilter({...filter,search:e.target.value});
     };
     return (
         <Accordion>

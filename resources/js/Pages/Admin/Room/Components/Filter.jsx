@@ -14,6 +14,7 @@ const Filter = ({defaultFilter, onFilter}) => {
     const [filter, setFilter] = useState(defaultFilter);
     const handleChange = (e) => {
         setFilter(prevState => ({...prevState, [e.target.name]: e.target.value ?? ""}));
+        onFilter({...filter,[e.target.name]:e.target.value});
     };
     const handleFilter=e=>{
         e.preventDefault();

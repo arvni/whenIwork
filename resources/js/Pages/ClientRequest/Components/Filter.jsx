@@ -8,10 +8,6 @@ const Filter = ({defaultFilter, onFilter}) => {
         onFilter({type});
         setFilter({type});
     }
-    const handleFilter = (e) => {
-        e.preventDefault();
-        onFilter(filter)
-    }
     return (<>
             <Tabs onChange={handleTypeChange} value={filter?.type ?? "shift"} sx={{marginBottom: "1rem"}} centered
                   title={"نوع درخواست"}>
