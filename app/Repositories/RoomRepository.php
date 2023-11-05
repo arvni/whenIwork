@@ -6,6 +6,7 @@ use App\Interfaces\PermissionRepositoryInterface;
 use App\Interfaces\RoomRepositoryInterface;
 use App\Models\Role;
 use App\Models\Room;
+use App\Models\Shift;
 use App\Models\User;
 use Carbon\Carbon;
 use JetBrains\PhpStorm\Pure;
@@ -184,16 +185,22 @@ class RoomRepository extends BaseRepository implements RoomRepositoryInterface
             if ($shift->type === "open") {
                 $newShift->Roles()->sync($shift->Roles->pluck("id")->toArray());
             } else {
-                $newShift->Works()->saveMany($shift->Works->map(function ($work) {
-                    unset($work->id);
-                    unset($work->shift_id);
-                    unset($work->accepted);
-                    unset($work->created_at);
-                    unset($work->updated_at);
-                    unset($work->changed);
-                    return $work;
-                }));
+                $newShift->Works()->saveMany($this->replicatedWorks($shift));
             }
         }
+    }
+
+    private function replicatedWorks(Shift $shift){
+        $works=[];
+        foreach($shift->Works as $oldWork) {
+            $work=$oldWork->replicate();
+            unset($work->shift_id);
+            unset($work->accepted);
+            unset($work->created_at);
+            unset($work->updated_at);
+            unset($work->changed);
+            $works[]=$work;
+        }
+        return $works;
     }
 }
