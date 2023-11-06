@@ -24,9 +24,9 @@ class CalculateUserHours
         $this->date = Carbon::now();
     }
 
-    public function calculateSumOfShiftsHours($user_id, $date = null)
+    public function calculateSumOfShiftsHours($user_id, $date = null, $view="month")
     {
-        $shifts = $this->shiftRepository->listAll(["filters" => ["date" => $this->dateRangeProvider($this->convertDateTimeStringToCarbon($date)), "user_id" => $user_id,"active"=>true]]);
+        $shifts = $this->shiftRepository->listAll(["filters" => ["date" => $this->dateRangeProvider($this->convertDateTimeStringToCarbon($date), $view), "user_id" => $user_id,"active"=>true]]);
         return $this->sumShifts($shifts);
     }
 
@@ -39,9 +39,9 @@ class CalculateUserHours
         return $sum;
     }
 
-    public function calculateSumOfLeavesHours($user_id, $date = null)
+    public function calculateSumOfLeavesHours($user_id, $date = null, $view="month")
     {
-        $leaves = $this->leaveRepository->listAll(["filters" => ["date" => $this->dateRangeProvider($this->convertDateTimeStringToCarbon($date)), "user_id" => $user_id, "status" => ["accepted"]]]);
+        $leaves = $this->leaveRepository->listAll(["filters" => ["date" => $this->dateRangeProvider($this->convertDateTimeStringToCarbon($date), $view), "user_id" => $user_id, "status" => ["accepted"]]]);
         return $this->sumLeaves($leaves);
     }
 
@@ -61,23 +61,22 @@ class CalculateUserHours
         return Carbon::parse($dateTime);
     }
 
-    public function dateRangeProvider($date): array
+    public function dateRangeProvider($date, $view="month"): array
     {
         $jDate = Jalalian::fromCarbon($date);
-        return [$this->getStartVisibleDate($jDate), $this->getEndVisibleDate($jDate)];
+        return [$this->getStartVisibleDate($jDate, $view), $this->getEndVisibleDate($jDate, $view)];
     }
 
-    private function getStartVisibleDate(Jalalian $date): string
+    private function getStartVisibleDate(Jalalian $date, $view="month"): string
     {
-        return $date->getFirstDayOfMonth()
+        return ($view!=="month"?$date->getFirstDayOfWeek():$date->getFirstDayOfMonth())
             ->toCarbon()
             ->format("Y-m-d");
     }
 
-    private function getEndVisibleDate(Jalalian $date): string
+    private function getEndVisibleDate(Jalalian $date, $view="month"): string
     {
-        return $date->getNextMonth()
-            ->getFirstDayOfMonth()
+        return ($view!=="month"?$date->getNextWeek()->getFirstDayOfWeek():$date->getNextMonth()->getFirstDayOfMonth())
             ->subDay()
             ->toCarbon()
             ->format("Y-m-d");

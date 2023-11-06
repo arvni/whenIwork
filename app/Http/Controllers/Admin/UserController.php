@@ -28,7 +28,7 @@ class UserController extends Controller
         $this->userRepository = $userRepository;
         $this->calendarService = $calendarService;
         $this->calculateUserHours = $calculateUserHours;
-        $this->middleware("indexProvider")->only(["index", "show"]);
+        $this->middleware("indexProvider")->only(["index"]);
     }
 
     /**
@@ -83,13 +83,13 @@ class UserController extends Controller
     public function show(User $user, Request $request)
     {
         $user = $this->userRepository->show($user);
-        $defaultValues = $request->all();
-        $shifts = $this->calendarService->listShifts($request->get("date", null), $user->id);
-        $leaves = $this->calendarService->listLeaves($request->get("date", null), $user->id);
-        $sumShifts = $this->calculateUserHours->calculateSumOfShiftsHours($user->id, $request->get("date", null));
-        $sumLeaves = $this->calculateUserHours->calculateSumOfLeavesHours($user->id, $request->get("date", null));
+        $shifts = $this->calendarService->listShifts($request->get("defaultDate", null), $user->id,$request->get("defaultView","month"));
+        $leaves = $this->calendarService->listLeaves($request->get("defaultDate", null), $user->id,$request->get("defaultView","month"));
+        $sumShifts = $this->calculateUserHours->calculateSumOfShiftsHours($user->id, $request->get("defaultDate", null), $request->get("defaultView","month"));
+        $sumLeaves = $this->calculateUserHours->calculateSumOfLeavesHours($user->id, $request->get("defaultDate", null), $request->get("defaultView","month"));
         $events = array_merge($shifts, $leaves);
-        return Inertia::render("Admin/User/Show", compact("user", "defaultValues", "events", "sumShifts", "sumLeaves"));
+        $defaults=$request->all();
+        return Inertia::render("Admin/User/Show", compact("user", "defaults", "events", "sumShifts", "sumLeaves",));
     }
 
     /**

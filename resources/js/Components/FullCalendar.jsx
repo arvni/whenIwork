@@ -5,6 +5,8 @@ import localizer from "@/Services/jalaliLocalizer";
 import PropTypes from 'prop-types'
 import "../../css/calndar.scss";
 import ErrorBoundary from "@/Components/ErrorBoundary";
+import CustomWeekView from "@/Components/CustomWeekView";
+import {Views} from "react-big-calendar";
 
 
 export const lang = {
@@ -29,36 +31,48 @@ export const lang = {
     },
 };
 
-function Event({ event,children,...rest }) {
+function Event({event, children, ...rest}) {
     return (
         <div className={event.className}>
             {children}
-    </div>
+        </div>
     )
 }
+
 Event.propTypes = {
     event: PropTypes.object,
 }
 
-const FullCalendar = ({onNavigate,events = [],}) => {
+const FullCalendar = ({onNavigate, defaultDate, defaultView, events = [],onView=null}) => {
 
+    const {views, ...otherProps} = React.useMemo(() => ({
+        views: {
+            month: true,
+            week: CustomWeekView,
+            day: true,
+            agenda: true
+        },
+        // ... other props
+    }), [])
     return <Container sx={{minHeight: "800px"}}>
-        <ErrorBoundary fallback={<p>Something went wrong</p>}>
-            <RBC.Calendar onNavigate={onNavigate}
-                style={{minHeight: "800px"}}
-                localizer={localizer}
-                events={events}
-                startAccessor="start"
-                endAccessor="end"
-                culture={"fa-IR"}
-                rtl={true}
-                messages={lang}
-                firstDayOfWeek={6}
-                components={{
-                    eventWrapper:Event
-                }}
-            />
-        </ErrorBoundary>
+        <RBC.Calendar onNavigate={onNavigate}
+                      defaultDate={defaultDate ? new Date(defaultDate) : new Date()}
+                      defaultView={defaultView ? Views[defaultView] : Views.MONTH}
+                      style={{minHeight: "800px"}}
+                      localizer={localizer}
+                      events={events}
+                      startAccessor="start"
+                      endAccessor="end"
+                      culture={"fa-IR"}
+                      rtl={true}
+                      messages={lang}
+                      onView={onView}
+                      firstDayOfWeek={6}
+                      views={views}
+                      components={{
+                          eventWrapper: Event
+                      }}
+        />
     </Container>;
 }
 

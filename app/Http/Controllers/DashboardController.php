@@ -33,6 +33,6 @@ class DashboardController extends Controller
 
         $sumShifts = $this->calculateUserHours->calculateSumOfShiftsHours(auth()->user()->id, $request->get("date", null));
         $sumLeaves = $this->calculateUserHours->calculateSumOfLeavesHours(auth()->user()->id, $request->get("date", null));
-        return Inertia::render("Dashboard", ["events" => array_merge($shifts, $leaves), "sumShifts" => $sumShifts, "sumLeaves" => $sumLeaves]);
+        return Inertia::render("Dashboard", ["events" => array_merge($shifts, $leaves), "sumShifts" => $sumShifts, "sumLeaves" => $sumLeaves,"defaults"=>$request->all()]);
     }
 }

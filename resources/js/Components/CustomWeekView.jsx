@@ -1,26 +1,24 @@
-import React, {useMemo} from 'react'
-import PropTypes from 'prop-types'
+import PropTypes from 'prop-types';
+import {useMemo} from "react";
+import TimeGrid from "react-big-calendar/lib/TimeGrid";
 import { Navigate } from 'react-big-calendar'
-import TimeGrid from 'react-big-calendar/lib/TimeGrid'
-
-export default function CustomWeekView({
-                                           date,
-                                           localizer,
-                                           max = localizer.endOf(new Date(), 'day'),
-                                           min = localizer.startOf(new Date(), 'day'),
-                                           scrollToTime = localizer.startOf(new Date(), 'day'),
-                                           ...props
-                                       }) {
+import jmoment from "jalali-moment";
+function MyWeek({
+                    date,
+                    localizer,
+                    max = localizer.endOf(new Date(), 'day'),
+                    min = localizer.startOf(new Date(), 'day'),
+                    scrollToTime = localizer.startOf(new Date(), 'day'),
+                    ...props
+                }) {
     const currRange = useMemo(
-        () => CustomWeekView.range(date, { localizer }),
+        () => MyWeek.range(date, { localizer }),
         [date, localizer]
     )
-    console.log(props);
 
     return (
         <TimeGrid
             date={date}
-            eventOffset={15}
             localizer={localizer}
             max={max}
             min={min}
@@ -31,7 +29,7 @@ export default function CustomWeekView({
     )
 }
 
-CustomWeekView.propTypes = {
+MyWeek.propTypes = {
     date: PropTypes.instanceOf(Date).isRequired,
     localizer: PropTypes.object,
     max: PropTypes.instanceOf(Date),
@@ -39,13 +37,19 @@ CustomWeekView.propTypes = {
     scrollToTime: PropTypes.instanceOf(Date),
 }
 
-CustomWeekView.range = (date, { localizer }) => {
-    const start = date
-    const end = localizer.add(start, 2, 'day')
+MyWeek.range = (date, { localizer }) => {
+    const md = jmoment.from(date, "fa");
+    let offset=md.weekday();
+    if (offset>5)
+        offset-=6;
+    else
+        offset+=1
+    offset*=-1;
+    const start = localizer.add(date,offset,'day');
+    const end =localizer.add(date,6+offset,'day');;
 
     let current = start
     const range = []
-
     while (localizer.lte(current, end, 'day')) {
         range.push(current)
         current = localizer.add(current, 1, 'day')
@@ -54,20 +58,27 @@ CustomWeekView.range = (date, { localizer }) => {
     return range
 }
 
-CustomWeekView.navigate = (date, action, { localizer }) => {
+MyWeek.navigate = (date, action, { localizer }) => {
     switch (action) {
         case Navigate.PREVIOUS:
-            return localizer.add(date, -3, 'day')
+            return localizer.add(date, -7, 'day')
 
         case Navigate.NEXT:
-            return localizer.add(date, 3, 'day')
+            return localizer.add(date, 7, 'day')
 
         default:
             return date
     }
 }
 
-CustomWeekView.title = (date, { localizer }) => {
-    const [start, ...rest] = CustomWeekView.range(date, { localizer })
-    return localizer.format({ start, end: rest.pop() }, 'dayRangeHeaderFormat')
+MyWeek.title = (date) => {
+    const md = jmoment.from(date);
+    let offset=md.weekday()+1;
+    if (offset>6)
+        offset-=6;
+    offset*=-1;
+    const start = md.add(offset,"day").locale("fa").format('jYYYY/jMM/jDD');
+    const end = md.add(8+offset,"day").locale("fa").format('jYYYY/jMM/jDD');
+    return `${start} - ${end} `
 }
+export default MyWeek;

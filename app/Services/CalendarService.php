@@ -32,20 +32,20 @@ class CalendarService
         $this->date = Carbon::now();
     }
 
-    public function listLeaves($date = null, $userId = null)
+    public function listLeaves($date = null, $userId = null, $view="month")
     {
         if ($date)
             $this->date = Carbon::parse($date);
-        $range = $this->dateRangeProvider($this->date);
+        $range = $this->dateRangeProvider($this->date,$view);
         $leaves = $this->fetchData($this->leaveRepository, $range, "started_at", $userId);
         return $this->convertLeavesToEvents($leaves);
     }
 
-    public function listShifts($date = null, $userId = null)
+    public function listShifts($date = null, $userId = null, $view="month")
     {
         if ($date)
             $this->date = Carbon::parse($date);
-        $range = $this->dateRangeProvider($this->date);
+        $range = $this->dateRangeProvider($this->date,$view);
         $shifts = $this->fetchData($this->shiftRepository, $range, "date", $userId);
         return $this->convertShiftToEvents($shifts);
 
@@ -73,28 +73,26 @@ class CalendarService
         ])->toArray();
     }
 
-    public function dateRangeProvider($date): array
+    public function dateRangeProvider($date, $view="month"): array
     {
         $jDate = Jalalian::fromCarbon($date);
-        return [$this->getStartVisibleDate($jDate), $this->getEndVisibleDate($jDate)];
+        return [$this->getStartVisibleDate($jDate, $view), $this->getEndVisibleDate($jDate, $view)];
     }
 
-    private function getStartVisibleDate(Jalalian $date): string
+    private function getStartVisibleDate(Jalalian $date, $view="month"): string
     {
-        return $date->subDays($date->getDay() - 1)
-            ->getFirstDayOfWeek()
+        return ($view!=="month"?$date->getFirstDayOfWeek():$date->getFirstDayOfMonth())
             ->toCarbon()
             ->format("Y-m-d");
     }
 
-    private function getEndVisibleDate(Jalalian $date): string
+    private function getEndVisibleDate(Jalalian $date, $view="month"): string
     {
-        return $date->getNextMonth()
-            ->getFirstDayOfMonth()
-            ->addDays(6)
-            ->getFirstDayOfWeek()
-            ->subDay()->toCarbon()
+        return ($view!=="month"?$date->getNextWeek()->getFirstDayOfWeek():$date->getNextMonth()->getFirstDayOfMonth())
+            ->subDay()
+            ->toCarbon()
             ->format("Y-m-d");
+
     }
 
     private function fetchData(RepositoryInterface $query, $range, $sortField, $userId = null)

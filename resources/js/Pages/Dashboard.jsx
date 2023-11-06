@@ -6,12 +6,13 @@ import Greetings from "@/Components/Greetings";
 import {Stack} from "@mui/material";
 
 
-const Dashboard = ({events, sumShifts, sumLeaves, ...props}) => {
-    const handleNavigate = (date) => {
+const Dashboard = ({events, sumShifts, sumLeaves,defaults, ...props}) => {
+    const handleNavigate = (defaultDate, defaultView) => {
         Inertia.visit(route("dashboard"), {
             preserveState: true,
             data: {
-                date
+                defaultDate,
+                defaultView,
             },
             only: ["events", "sumShifts", "sumLeaves"]
         })
@@ -35,7 +36,7 @@ const Dashboard = ({events, sumShifts, sumLeaves, ...props}) => {
                 </p>
 
             </Stack>
-            <FullCalendar onNavigate={handleNavigate} events={convertedEvents}/>
+            <FullCalendar onNavigate={handleNavigate} events={convertedEvents}  defaultDate={defaults?.defaultDate} defaultView={(defaults?.defaultView+"").toUpperCase()}/>
         </>
     );
 }
