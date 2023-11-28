@@ -3,7 +3,7 @@ import {Head, useForm} from "@inertiajs/inertia-react";
 
 import {GridActionsCellItem} from "@mui/x-data-grid";
 import {Edit as EditIcon, Delete as DeleteIcon, RemoveRedEye} from "@mui/icons-material";
-
+import MapIcon from '@mui/icons-material/Map';
 
 import TableLayout from "@/Layouts/TableLayout";
 
@@ -13,6 +13,7 @@ import Filter from "./Components/Filter";
 import AddForm from "./Components/AddForm";
 import {Inertia} from "@inertiajs/inertia";
 import AdminLayout from "@/Layouts/AdminLayout";
+
 
 const Index = ({departments, status, errors, defaultValues,success}) => {
     const {post, setData, data, reset, processing} = useForm({name: "", description: "", isActive: true})
@@ -37,11 +38,21 @@ const Index = ({departments, status, errors, defaultValues,success}) => {
                     <GridActionsCellItem key={"show-"+params.value}
                                          icon={<RemoveRedEye color={"info"}/>}
                                          label="نمایش"
-                                         onClick={showDepartment(params.row.id)}
+                                         title="نمایش"
+                                         href={route("admin.departments.show", params.row.id)}
+                                         onClick={showDepartment(route("admin.departments.show", params.row.id))}
+                    />,
+                    <GridActionsCellItem key={"show-map-view-"+params.value}
+                                         icon={<MapIcon color={"success"}/>}
+                                         label="نمای کلی"
+                                         title="نمای کلی"
+                                         href={route("admin.departments.map", params.row.id)}
+                                         onClick={showDepartment(route("admin.departments.map", params.row.id))}
                     />,
                     <GridActionsCellItem key={"edit-"+params.value}
                                          icon={<EditIcon color={"warning"}/>}
                                          label="بروزرسانی"
+                                         title="بروزرسانی"
                                          onClick={editDepartment(params.row.id)}
                     />
                 ]
@@ -63,7 +74,10 @@ const Index = ({departments, status, errors, defaultValues,success}) => {
         setData({...res.data.data, _method: 'put'});
         setOpenAddForm(true);
     };
-    const showDepartment = (id) => () => Inertia.visit(route("admin.departments.show", id));
+    const showDepartment = (route) => (e) => {
+        e.preventDefault();
+        Inertia.visit(route);
+    }
     const deleteDepartment = (params) => () => {
         setData({...params,_method: "delete"});
         setOpenDeleteForm(true);

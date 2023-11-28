@@ -14,8 +14,8 @@ const Index = ({users, status, defaultValues, success}) => {
     const [open, setOpen] = useState(false);
     const [openChangePassword, setOpenChangePassword] = useState(false);
     const columns = [
-        {field: 'userId', headerName: 'شناسه', type: "string", width: 70},
-        {field: 'name', headerName: 'نام', type: "string", width: 150},
+        {field: 'userId', headerName: 'شناسه کاربری', type: "string", width: 70},
+        {field: 'name', headerName: 'نام و نام خانوادگی', type: "string", width: 150},
         {field: 'email', headerName: 'ایمیل', type: "email", width: 150},
         {field: 'mobileNo', headerName: 'شماره موبایل', type: "string", width: 100},
         {

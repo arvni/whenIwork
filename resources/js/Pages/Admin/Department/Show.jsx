@@ -1,6 +1,5 @@
 import { useState} from "react";
 import {Head, useForm, usePage} from "@inertiajs/inertia-react";
-
 import {GridActionsCellItem} from "@mui/x-data-grid";
 import {Edit as EditIcon, Delete as DeleteIcon, RemoveRedEye} from "@mui/icons-material";
 
@@ -15,9 +14,11 @@ import {fetchData} from "@/Services/fetchData";
 import {Inertia} from "@inertiajs/inertia";
 import Loading from "@/Components/Loading";
 import AdminLayout from "@/Layouts/AdminLayout";
+import FullView from "@/Pages/Admin/Department/Components/FullView";
+import {Grid} from "@mui/material";
 
 const Index = () => {
-    const {department, status, errors, defaultValues} = usePage().props;
+    const {department, status, errors, defaultValues,events} = usePage().props;
     const {post, data, setData, reset, processing} = useForm();
     const columns = [
         {
@@ -90,7 +91,10 @@ const Index = () => {
         reset();
     }
 
-    const showRoom = (id) => () => Inertia.visit(route("admin.rooms.show", id));
+    const showRoom = (id) => (e) => {
+        e.preventDefault();
+        Inertia.visit(route("admin.rooms.show", id));
+    };
 
     const pageReload = (page, filters, sort, pageSize) => Inertia.visit(route('admin.departments.show', department.id), {
         data: {

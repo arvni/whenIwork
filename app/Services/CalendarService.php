@@ -35,7 +35,7 @@ class CalendarService
     public function listLeaves($date = null, $userId = null, $view="month")
     {
         if ($date)
-            $this->date = Carbon::parse($date);
+            $this->date = Carbon::parse($date,"Asia/Tehran");
         $range = $this->dateRangeProvider($this->date,$view);
         $leaves = $this->fetchData($this->leaveRepository, $range, "started_at", $userId);
         return $this->convertLeavesToEvents($leaves);
@@ -44,7 +44,7 @@ class CalendarService
     public function listShifts($date = null, $userId = null, $view="month")
     {
         if ($date)
-            $this->date = Carbon::parse($date);
+            $this->date = Carbon::parse($date,"Asia/Tehran");
         $range = $this->dateRangeProvider($this->date,$view);
         $shifts = $this->fetchData($this->shiftRepository, $range, "date", $userId);
         return $this->convertShiftToEvents($shifts);

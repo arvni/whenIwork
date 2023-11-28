@@ -31,7 +31,7 @@ export const lang = {
     },
 };
 
-function Event({event, children, ...rest}) {
+export function Event({event, children}) {
     return (
         <div className={event.className}>
             {children}
@@ -45,14 +45,13 @@ Event.propTypes = {
 
 const FullCalendar = ({onNavigate, defaultDate, defaultView, events = [],onView=null}) => {
 
-    const {views, ...otherProps} = React.useMemo(() => ({
+    const {views} = React.useMemo(() => ({
         views: {
             month: true,
             week: CustomWeekView,
             day: true,
             agenda: true
         },
-        // ... other props
     }), [])
     return <Container sx={{minHeight: "800px"}}>
         <RBC.Calendar onNavigate={onNavigate}

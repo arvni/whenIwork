@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\ClientRequestListController;
 use App\Http\Controllers\Admin\ConfirmClientRequestController;
 use App\Http\Controllers\Admin\ConfirmLeaveController;
 use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\DepartmentMapViewController;
 use App\Http\Controllers\Admin\DuplicateWeekShiftsController;
 use App\Http\Controllers\Admin\LeaveController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -46,6 +47,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('/roles', RoleController::class);
         Route::resource('/permissions', PermissionController::class);
         Route::resource('/departments', DepartmentController::class)->except(["edit"]);
+        Route::get('/departments/{department}/map', DepartmentMapViewController::class)->name("departments.map");
         Route::resource('/rooms', RoomController::class)->except(["edit"]);
         Route::post("/{room}/duplicate-shifts", DuplicateWeekShiftsController::class)->name("rooms.shifts_duplicate");
         Route::resource('/shifts', ShiftController::class)->except(["edit", "create"]);

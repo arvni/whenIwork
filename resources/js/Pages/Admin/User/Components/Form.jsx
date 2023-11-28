@@ -20,14 +20,14 @@ const UserForm = ({values, setValues, cancel, loading, submit, errors, edit}) =>
         <Container>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={6} md={4}>
-                    <TextField error={Object.keys(errors).includes('name')} helperText={errors?.name ?? ""}
-                               label={"نام"}
-                               name={"name"} value={values.name} onChange={handleChange} sx={{width: "100%"}}/>
+                    <TextField error={Object.keys(errors).includes('userId')} helperText={errors?.userId ?? ""}
+                               label={"شناسه کاربری"}
+                               name={"userId"} value={values.userId} onChange={handleChange} sx={{width: "100%"}}/>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                    <TextField error={Object.keys(errors).includes('userId')} helperText={errors?.userId ?? ""}
-                               label={"نام کاربری"}
-                               name={"userId"} value={values.userId} onChange={handleChange} sx={{width: "100%"}}/>
+                    <TextField error={Object.keys(errors).includes('name')} helperText={errors?.name ?? ""}
+                               label={"نام و نام خانوادگی"}
+                               name={"name"} value={values.name} onChange={handleChange} sx={{width: "100%"}}/>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                     <TextField error={Object.keys(errors).includes('email')} helperText={errors?.email ?? ""}

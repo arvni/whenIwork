@@ -22,3 +22,21 @@
     background: #aba800;
     border-color: #f6e85c;
 }
+.rbc-day-slot .rbc-event-content {
+    transform: rotate(90deg);
+    transform-origin: 38px 45px;
+}
+.rbc-time-content > .rbc-day-slot{
+    min-width: 200px;
+}
+
+.hidden-title{
+    & .rbc-time-header{
+        display: none;
+    }
+}
+.hidden-time{
+    & .rbc-time-gutter.rbc-time-column{
+        display: none;
+    }
+}
