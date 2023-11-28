@@ -25,7 +25,7 @@ const MapView = ({department,rooms,defaultValues}) => {
                                    onChange={pageReload} />
         </Stack>
         <Divider sx={{my:2}}/>
-        <Grid container sx={{overflowX:"auto",flexWrap: "nowrap"}} direction={"row"} >
+        <Grid container sx={{flexWrap: "nowrap"}} direction={"row"} >
         {rooms.map((item,index)=><Grid item key={item.id}>
             <Typography textAlign="center" component="h2" sx={{fontWeight:500,fontSize:"1.5em"}}>{item.title}</Typography>
             <FullView events={item.shifts.map(item => ({
