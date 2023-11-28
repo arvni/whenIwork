@@ -7,8 +7,7 @@ use App\Http\Controllers\Api\RolesController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\RoomListController;
 use App\Http\Controllers\Api\ShiftController;
-use App\Http\Controllers\FileController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,7 +29,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/rooms/{room}', [RoomController::class, "show"])->name("admin.roomApi.show");
         Route::get('/departments/{department}', [DepartmentController::class, "show"])->name("admin.departmentApi.show");
         Route::get('/departments', [DepartmentController::class, "index"])->name("admin.departmentApi.index");
-        Route::get('/users', [\App\Http\Controllers\Api\UserController::class, "index"])->name("admin.userApi.index");
+        Route::get('/users', [UserController::class, "index"])->name("admin.userApi.index");
         Route::get("shifts/{shift}", [ShiftController::class, "show"])->name("admin.shiftApi.show");
     });
 

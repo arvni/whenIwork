@@ -6,7 +6,6 @@ use App\Http\Controllers\Admin\ConfirmLeaveController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DepartmentMapViewController;
 use App\Http\Controllers\Admin\DuplicateWeekShiftsController;
-use App\Http\Controllers\Admin\LeaveController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RejectClientRequestController;
 use App\Http\Controllers\Admin\RoleController;
@@ -20,11 +19,7 @@ use App\Http\Controllers\ClientShiftListController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MessageController;
-use App\Http\Controllers\OptionController;
-use App\Models\Work;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
