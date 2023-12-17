@@ -28,7 +28,7 @@ class CheckUserShiftPublish implements Rule
     public function passes($attribute, $value)
     {
         $user = $value->Users()->first();
-        if ($user->Leaves()->where(function ($q) use ($value) {
+        if ($user->Leaves()->accepted()->where(function ($q) use ($value) {
             $q->whereDate("started_at", ">=", Carbon::parse($value->date)->toDate())->whereDate("ended_at", "<=", Carbon::parse($value->date)->toDate());
         })->where("type", "daily")->count()) {
             $this->msg=__("messages.haveDailyLeaveOnThisDate");

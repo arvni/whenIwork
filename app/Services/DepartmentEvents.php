@@ -27,7 +27,7 @@ class DepartmentEvents
     {
         return array_map(fn($room) => [
             "id" => $room["id"],
-            "title" => "بخش " . $room["name"],
+            "title" => $room["name"],
             "shifts" => array_map(fn($shift) => [
                 "title" => "شیفت " . __("constants." . $shift["type"]) . " : " . implode(", ", array_map(fn($work) => $work["user"]["name"],$shift["works"]??[])),
                 "start" => $shift["date"]." ".$shift["started_at"],
