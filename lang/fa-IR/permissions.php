@@ -34,5 +34,6 @@ return [
     "admin.departments.edit" => "بروزرسانی دپارتمان",
     "admin.departments.destroy" => "حذف دپارتمان",
     "admin.Department.*"=>"hello",
-    "admin.users.leaves"=>"تایید مرخصی"
+    "admin.users.leaves"=>"تایید مرخصی",
+    "admin.MapView"=>"نمای کلی"
 ];

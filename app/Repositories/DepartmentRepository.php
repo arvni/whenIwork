@@ -18,10 +18,24 @@ class DepartmentRepository implements DepartmentRepositoryInterface
 
     public function list(array $queryData)
     {
-        $query = $this->department->withCount("Rooms");
-        $this->applyFilters($query, $queryData["filters"]);
-        $this->applyOrderBy($query, $queryData["sort"]);
-        return $this->applyPaginate($query, $queryData["pageSize"]);
+        $query = $this->department->newQuery()->withCount("Rooms");
+        if (isset($queryData["filters"]))
+            $this->applyFilters($query, $queryData["filters"]);
+        if (isset($queryData["sort"]))
+            $this->applyOrderBy($query, $queryData["sort"]);
+        return $this->applyPaginate($query, $queryData["pageSize"] ?? 100);
+    }
+
+
+    public function listMapviewDepartments(array $queryData)
+    {
+        $query = $this->department->newQuery();
+        $this->applyPermissionLimits($query);
+        if (isset($queryData["filters"]))
+            $this->applyFilters($query, $queryData["filters"]);
+        if (isset($queryData["sort"]))
+            $this->applyOrderBy($query, $queryData["sort"]);
+        return $this->applyPaginate($query, $queryData["pageSize"] ?? 100);
     }
 
     public function listForCombo(array $queryData)
@@ -56,12 +70,15 @@ class DepartmentRepository implements DepartmentRepositoryInterface
 
     public function edit(Department $department, $departmentNewData)
     {
+        $this->createPermissions($department);
         return $department->update($departmentNewData);
-
     }
 
     public function delete(Department $department): bool
     {
+
+        Permission::where("name","admin.Department.$department->id")->delete();
+        Permission::where("name","admin.MapView.$department->id")->delete();
         if ($department->Rooms()->count() < 1)
             return $department->delete();
         return false;
@@ -70,7 +87,6 @@ class DepartmentRepository implements DepartmentRepositoryInterface
     private function applyFilters($query, $filters)
     {
         if (isset($filters["search"])) {
-
             $query->where("name", "like", "%" . $filters["search"] . "%");
         }
     }
@@ -93,11 +109,26 @@ class DepartmentRepository implements DepartmentRepositoryInterface
     private function createPermissions(Department $department)
     {
         Permission::findOrCreate("admin.Department.$department->id");
+        Permission::findOrCreate("admin.MapView.$department->id");
     }
 
     public function findById($id)
     {
         return $this->department->find($id);
+    }
+
+    private function applyPermissionLimits($query)
+    {
+
+        $ids = auth()->user()->getAllPermissions()
+            ->filter(fn ($value) =>preg_match('/^admin\\.MapView\\.\\d+/',$value->name))
+            ->map(fn($item) => $item->name)
+            ->map(function ($item) {
+                list($_, $__, $id) = explode(".", $item);
+                return (int)$id;
+            })
+            ->toArray();
+        return $query->whereIn("id", [...$ids]);
     }
 
 }

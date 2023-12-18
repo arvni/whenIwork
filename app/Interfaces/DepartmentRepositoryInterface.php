@@ -9,6 +9,7 @@ use App\Models\Department;
 interface DepartmentRepositoryInterface
 {
     public function list(array $queryData);
+    public function listMapviewDepartments(array $queryData);
 
     public function listForCombo(array $queryData);
 

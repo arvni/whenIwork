@@ -42,13 +42,6 @@ const Index = ({departments, status, errors, defaultValues,success}) => {
                                          href={route("admin.departments.show", params.row.id)}
                                          onClick={showDepartment(route("admin.departments.show", params.row.id))}
                     />,
-                    <GridActionsCellItem key={"show-map-view-"+params.value}
-                                         icon={<MapIcon color={"success"}/>}
-                                         label="نمای کلی"
-                                         title="نمای کلی"
-                                         href={route("admin.departments.map", params.row.id)}
-                                         onClick={showDepartment(route("admin.departments.map", params.row.id))}
-                    />,
                     <GridActionsCellItem key={"edit-"+params.value}
                                          icon={<EditIcon color={"warning"}/>}
                                          label="بروزرسانی"

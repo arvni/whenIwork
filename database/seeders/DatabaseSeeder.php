@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             }
         }
         $permissions[]=Permission::findOrCreate("admin.users.chang_password");
+        $permissions[]=Permission::findOrCreate("admin.MapView");
         $permissions[]=Permission::findOrCreate("admin.users.leaves");
 
         $role=Role::findOrCreate("Admin")->syncPermissions($permissions);

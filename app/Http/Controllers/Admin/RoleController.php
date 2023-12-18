@@ -7,6 +7,7 @@ use App\Http\Requests\RoleRequest;
 use App\Interfaces\RoleRepositoryInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Permission;
@@ -122,10 +123,18 @@ class RoleController extends Controller
                 list($section, $parentClass, $parentId, $class, $id) = optional($sections);
                 $name = __("permissions.$item->name");
                 if ($parentClass && $class)
-                    $name = __("constants.$section") . " " . __("constants.$parentClass") . " " . optional(("App\Models\\$parentClass")::find($parentId))->name . " " . __("constants.$class") . " " . optional(("App\Models\\$class")::find($id))->name;
+                    $name = __("constants.$section")
+                        . " " . __("constants.$parentClass")
+                        . " " . (class_exists("App\Models\\$parentClass")? optional(("App\Models\\$parentClass")::find($parentId))->name: ""). " " . __("constants.$class") . " " . (class_exists("App\Models\\$class")?optional(("App\Models\\$class")::find($id))->name:"");
                 elseif ($parentClass && $parentId && class_exists("App\Models\\$parentClass")) {
                     $name = __("constants.$section") . " " . __("constants.$parentClass") . " " . optional(("App\Models\\$parentClass")::find($parentId))->name;
                 }
+                elseif ($parentClass && $parentId && is_numeric($parentId)) {
+                    $name = __("constants.$parentClass") . " " . optional(("App\Models\\Department")::find($parentId))->name;
+                }
+//                elseif ($parentClass) {
+//                    $name = __("constants.$section") . " " . __("constants.$parentClass");
+//                }
                 return [
                     "name" => $name,
                     "id" => $item->id,

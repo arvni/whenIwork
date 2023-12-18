@@ -1,6 +1,5 @@
 import Authenticated from "./AuthenticatedLayout";
 import {
-    ArrowLeft,
     BusinessSharp,
     Dashboard as DashboardIcon,
     Groups as GroupsIcon,
@@ -9,6 +8,7 @@ import {
 } from "@mui/icons-material";
 import React from "react";
 import EditCalendarIcon from "@mui/icons-material/EditCalendar";
+import helicopter from "../../images/helicopter.png";
 
 const AdminLayout=({auth, breadcrumbs, children})=>{
     const routes = [
@@ -22,6 +22,12 @@ const AdminLayout=({auth, breadcrumbs, children})=>{
             href: 'admin.departments.index',
             icon: <BusinessSharp/>,
             permission: "admin.departments.index"
+        },
+        {
+            title: "نمای کلی",
+            href: 'admin.departments.mapIndex',
+            icon: <img src={helicopter} width="30"/>,
+            permission: "admin.MapView"
         },
         {
             title: "بخش ها",

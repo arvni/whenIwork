@@ -34,7 +34,7 @@ class DepartmentController extends Controller
 
     public function show(Department $department, Request $request)
     {
-        $this->authorizeForUser(auth()->user(), "admin.Department.$department->id");
+        $this->authorize("update",$department);
         $defaultValues =$request->all();
         $department = $this->departmentRepository->show($department, $defaultValues);
         return Inertia::render("Admin/Department/Show", compact("department","defaultValues"));

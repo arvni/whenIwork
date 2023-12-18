@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ConfirmLeaveController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DepartmentMapViewController;
 use App\Http\Controllers\Admin\DuplicateWeekShiftsController;
+use App\Http\Controllers\Admin\ListMapViewDepartmentController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RejectClientRequestController;
 use App\Http\Controllers\Admin\RoleController;
@@ -41,6 +42,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('/users', UserController::class);
         Route::resource('/roles', RoleController::class);
         Route::resource('/permissions', PermissionController::class);
+        Route::get('/departments/map', ListMapViewDepartmentController::class)->name("departments.mapIndex");
         Route::resource('/departments', DepartmentController::class)->except(["edit"]);
         Route::get('/departments/{department}/map', DepartmentMapViewController::class)->name("departments.map");
         Route::resource('/rooms', RoomController::class)->except(["edit"]);
