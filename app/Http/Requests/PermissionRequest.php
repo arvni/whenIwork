@@ -15,7 +15,7 @@ class PermissionRequest extends FormRequest
     public function authorize(Request $request)
     {
 
-//        return $request->user()->can('admin.permissions.create');
+        return $request->user()->can('admin.permissions.create');
     }
 
     /**

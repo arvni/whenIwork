@@ -28,8 +28,9 @@ class ListMapViewDepartmentController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $this->authorizeForUser(auth()->user(), "admin.departments.mapView");
-        $defaultValues =$request->all();
+        if (!auth()->user()->can("admin.departments.mapView"))
+            abort(403);
+        $defaultValues = $request->all();
         $departments = $this->departmentRepository->listMapviewDepartments($defaultValues);
         return Inertia::render("Admin/Department/MapViewIndex", compact("departments", "defaultValues"));
     }
