@@ -32,7 +32,7 @@ class FileController extends Controller
             return new FileResource($doc);
         } catch (\Exception $exception) {
             $doc->delete();
-            return abort('500', $exception->getMessage());
+            abort('500', $exception->getMessage());
         }
     }
 

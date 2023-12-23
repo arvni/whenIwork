@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\CalculateUserHours;
 use App\Services\CalendarService;
 use App\Utils\FileAction;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -53,9 +54,10 @@ class UserController extends Controller
      */
     public function create(): Response|RedirectResponse
     {
-        if (auth()->user()->can("admin.users.create"))
-            return Inertia::render('Admin/User/Add');
-        throw new AccessException(__("access.not_allowed"));
+
+        if (!auth()->user()->can("admin.users.create"))
+            abort(403);
+        return Inertia::render('Admin/User/Add');
     }
 
     /**
@@ -83,12 +85,12 @@ class UserController extends Controller
     public function show(User $user, Request $request)
     {
         $user = $this->userRepository->show($user);
-        $shifts = $this->calendarService->listShifts($request->get("defaultDate", null), $user->id,$request->get("defaultView","month"));
-        $leaves = $this->calendarService->listLeaves($request->get("defaultDate", null), $user->id,$request->get("defaultView","month"));
-        $sumShifts = $this->calculateUserHours->calculateSumOfShiftsHours($user->id, $request->get("defaultDate", null), $request->get("defaultView","month"));
-        $sumLeaves = $this->calculateUserHours->calculateSumOfLeavesHours($user->id, $request->get("defaultDate", null), $request->get("defaultView","month"));
+        $shifts = $this->calendarService->listShifts($request->get("defaultDate", null), $user->id, $request->get("defaultView", "month"));
+        $leaves = $this->calendarService->listLeaves($request->get("defaultDate", null), $user->id, $request->get("defaultView", "month"));
+        $sumShifts = $this->calculateUserHours->calculateSumOfShiftsHours($user->id, $request->get("defaultDate", null), $request->get("defaultView", "month"));
+        $sumLeaves = $this->calculateUserHours->calculateSumOfLeavesHours($user->id, $request->get("defaultDate", null), $request->get("defaultView", "month"));
         $events = array_merge($shifts, $leaves);
-        $defaults=$request->all();
+        $defaults = $request->all();
         return Inertia::render("Admin/User/Show", compact("user", "defaults", "events", "sumShifts", "sumLeaves",));
     }
 
@@ -137,7 +139,7 @@ class UserController extends Controller
         $title = $user->name;
         try {
             $user->delete();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()->route('admin.users.index')->withErrors($e->getMessage());
         }
         return redirect()->route('admin.users.index')->with(["success" => true, "status" => "$title Successfully Deleted"]);

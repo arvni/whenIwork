@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Interfaces\DepartmentRepositoryInterface;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Inertia\Inertia;
 
 class ListMapViewDepartmentController extends Controller
@@ -28,7 +27,7 @@ class ListMapViewDepartmentController extends Controller
      */
     public function __invoke(Request $request)
     {
-        if (!auth()->user()->can("admin.departments.mapView"))
+        if (!auth()->user()->can("admin.mapView"))
             abort(403);
         $defaultValues = $request->all();
         $departments = $this->departmentRepository->listMapviewDepartments($defaultValues);

@@ -32,7 +32,7 @@ class ConfirmClientRequestController extends Controller
      */
     public function __invoke(ClientRequest $clientRequest, ClientRequestConfirmRequest $request)
     {
-        $this->authorize("confirm", $clientRequest);
+
         $this->clientRequestRepository->adminConfirm($clientRequest);
         return $this->responseWithSuccess(__("messages.SuccessConfirmClientRequest"));
     }

@@ -18,7 +18,7 @@ class MessageController extends Controller
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @return RedirectResponse|Response|\Inertia\Response
+     * @return \Inertia\Response
      */
     public function index(Request $request)
     {

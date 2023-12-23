@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RoleRequest;
 use App\Interfaces\RoleRepositoryInterface;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -31,7 +32,9 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorizeForUser(auth()->user(), "admin.roles.index");
+
+        if (!auth()->user()->can("admin.roles.index"))
+            abort(403);
         $defaultValues = $request->all();
         $roles = $this->roleRepository->list($defaultValues);
 
@@ -45,7 +48,8 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $this->authorizeForUser(auth()->user(), "admin.roles.create");
+        if (!auth()->user()->can("admin.roles.create"))
+            abort(403);
 
         return Inertia::render('Admin/Role/Add', [
             "permissions" => $this->preparePermissions()
@@ -69,11 +73,13 @@ class RoleController extends Controller
      *
      * @param Role $role
      * @return RedirectResponse|Response
+     * @throws AuthorizationException
      */
     public function edit(Role $role)
     {
 
-        $this->authorizeForUser(auth()->user(), "admin.roles.edit", $role);
+        if (!auth()->user()->can("admin.roles.edit"))
+            abort(403);
 
         $role["permissions"] = $role->permissions()->get(['id'])->map(function ($item) {
             return $item["id"];

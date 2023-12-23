@@ -20,7 +20,9 @@ class DepartmentController extends Controller
 
     public function index(Request $request)
     {
-        $this->authorizeForUser(auth()->user(), "admin.departments.index");
+
+        if (!auth()->user()->can("admin.departments.index"))
+            abort(403);
         $defaultValues =$request->all();
         $departments = $this->departmentRepository->list($defaultValues);
         return Inertia::render("Admin/Department/Index", compact("departments", "defaultValues"));

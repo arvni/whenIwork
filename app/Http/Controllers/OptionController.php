@@ -17,7 +17,7 @@ class OptionController extends Controller
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @return JsonResponse|RedirectResponse|AnonymousResourceCollection|Response
+     * @return RedirectResponse|Response
      */
     public function index(Request $request)
     {
