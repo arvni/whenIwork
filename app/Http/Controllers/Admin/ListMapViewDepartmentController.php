@@ -27,7 +27,7 @@ class ListMapViewDepartmentController extends Controller
      */
     public function __invoke(Request $request)
     {
-        if (!auth()->user()->can("admin.mapView"))
+        if (!auth()->user()->can("admin.MapView"))
             abort(403);
         $defaultValues = $request->all();
         $departments = $this->departmentRepository->listMapviewDepartments($defaultValues);
