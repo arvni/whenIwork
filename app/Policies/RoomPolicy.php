@@ -19,7 +19,7 @@ class RoomPolicy
      */
     public function viewAny(User $user)
     {
-        //
+        return true;
     }
 
     /**

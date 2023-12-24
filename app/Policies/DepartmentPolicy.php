@@ -19,7 +19,7 @@ class DepartmentPolicy
      */
     public function viewAny(User $user)
     {
-        //
+        return $user->can("admin.departments.index");
     }
 
     /**
@@ -42,7 +42,7 @@ class DepartmentPolicy
      */
     public function create(User $user)
     {
-        return $user->can( "admin.Department.create");
+        return $user->can( "admin.departments.create");
     }
 
     /**
@@ -54,7 +54,7 @@ class DepartmentPolicy
      */
     public function update(User $user, Department $department)
     {
-        return $user->can( "admin.Department.edit");
+        return $user->can( "admin.departments.edit");
     }
 
     /**
@@ -66,7 +66,7 @@ class DepartmentPolicy
      */
     public function delete(User $user, Department $department)
     {
-        return $user->can( "admin.Department.delete");
+        return $user->can( "admin.departments.delete");
     }
 
     /**
