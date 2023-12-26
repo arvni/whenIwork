@@ -77,7 +77,7 @@ class DepartmentPolicy
      */
     public function mapView(User $user, Department $department)
     {
-        return $user->can("admin.Department.$department->id");
+        return $user->can("admin.MapView.$department->id");
     }
 
     /**
