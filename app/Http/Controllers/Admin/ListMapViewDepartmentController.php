@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Interfaces\DepartmentRepositoryInterface;
+use App\Models\Department;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ListMapViewDepartmentController extends Controller
 {
@@ -22,13 +24,11 @@ class ListMapViewDepartmentController extends Controller
      * Handle the incoming request.
      *
      * @param Request $request
-     * @return \Inertia\Response
-     * @throws AuthorizationException
+     * @return Response
      */
     public function __invoke(Request $request)
     {
-        if (!auth()->user()->can("admin.MapView"))
-            abort(403);
+        $this->authorize("listMapView",Department::class);
         $defaultValues = $request->all();
         $departments = $this->departmentRepository->listMapviewDepartments($defaultValues);
         return Inertia::render("Admin/Department/MapViewIndex", compact("departments", "defaultValues"));

@@ -15,7 +15,7 @@ class DepartmentPolicy
      * Determine whether the user can view any models.
      *
      * @param User $user
-     * @return Response|bool
+     * @return bool
      */
     public function viewAny(User $user)
     {
@@ -27,7 +27,7 @@ class DepartmentPolicy
      *
      * @param User $user
      * @param Department $department
-     * @return Response|bool
+     * @return bool
      */
     public function view(User $user, Department $department)
     {
@@ -50,7 +50,7 @@ class DepartmentPolicy
      *
      * @param User $user
      * @param Department $department
-     * @return Response|bool
+     * @return bool
      */
     public function update(User $user, Department $department)
     {
@@ -62,11 +62,33 @@ class DepartmentPolicy
      *
      * @param User $user
      * @param Department $department
-     * @return Response|bool
+     * @return bool
      */
     public function delete(User $user, Department $department)
     {
         return $user->can( "admin.departments.delete");
+    }
+    /**
+     * Determine whether the user can delete the model.
+     *
+     * @param User $user
+     * @param Department $department
+     * @return bool
+     */
+    public function mapView(User $user, Department $department)
+    {
+        return $user->can("admin.Department.$department->id");
+    }
+
+    /**
+     * Determine whether the user can delete the model.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function listMapView(User $user)
+    {
+        return $user->can("admin.MapView");
     }
 
     /**

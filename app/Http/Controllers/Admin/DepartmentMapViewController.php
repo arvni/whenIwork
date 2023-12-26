@@ -23,9 +23,7 @@ class DepartmentMapViewController extends Controller
      */
     public function __invoke(Department $department, Request $request): Response
     {
-        if (!auth()->user()->can("admin.Department.$department->id"))
-            abort(403);
-
+        $this->authorize("mapView",$department);
         $rooms = (new DepartmentEvents)($department, $request->get("date"));
         $defaultValues = ["date" => $request->get("date", Carbon::now("Asia/Tehran")->format("Y-m-d"))];
         return Inertia::render("Admin/Department/MapView", compact("department", "defaultValues", "rooms"));
