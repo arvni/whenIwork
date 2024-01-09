@@ -20,9 +20,7 @@ class DepartmentController extends Controller
 
     public function index(Request $request)
     {
-
-        if (!auth()->user()->can("admin.departments.index"))
-            abort(403);
+        $this->authorize("viewAny",Department::class);
         $defaultValues =$request->all();
         $departments = $this->departmentRepository->list($defaultValues);
         return Inertia::render("Admin/Department/Index", compact("departments", "defaultValues"));
@@ -30,6 +28,7 @@ class DepartmentController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize("create",Department::class);
         $department = $this->departmentRepository->create($request->all());
         return $this->responseWithSuccess(__("messages.successAdded", ['title' => $department->name]));
     }
@@ -44,12 +43,14 @@ class DepartmentController extends Controller
 
     public function update(Department $department, Request $request)
     {
+        $this->authorize("update",$department);
         $this->departmentRepository->edit($department, $request->all());
         return $this->responseWithSuccess(__("messages.successUpdated", ['title' => $department->name]));
     }
 
     public function destroy(Department $department)
     {
+        $this->authorize("delete",$department);
         $title = $department->name;
         if ($this->departmentRepository->delete($department))
             return $this->responseWithSuccess(__("messages.successfulDeleted", ["title" => $title]));

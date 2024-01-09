@@ -76,11 +76,11 @@ class DepartmentRepository implements DepartmentRepositoryInterface
 
     public function delete(Department $department): bool
     {
-
-        Permission::where("name","admin.Department.$department->id")->delete();
-        Permission::where("name","admin.MapView.$department->id")->delete();
-        if ($department->Rooms()->count() < 1)
+        if ($department->Rooms()->count() < 1) {
+            Permission::where("name", "admin.Department.$department->id")->delete();
+            Permission::where("name", "admin.MapView.$department->id")->delete();
             return $department->delete();
+        }
         return false;
     }
 
