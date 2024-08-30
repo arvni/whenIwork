@@ -5,7 +5,9 @@ namespace App\Repositories;
 use App\Interfaces\LeaveRepositoryInterface;
 use App\Models\Leave;
 use App\Models\User;
+use App\Notifications\LeaveRequestAccepted;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Notification;
 
 class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface
 {
@@ -103,6 +105,8 @@ class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface
         $leave->Acceptor()->associate(auth()->user());
         $leave->status = "accepted";
         $leave->save();
+        $leave->load("User");
+        Notification::send([$leave->User],new LeaveRequestAccepted($leave));
     }
 
     public function reject(Leave $leave)

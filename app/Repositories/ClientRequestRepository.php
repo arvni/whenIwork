@@ -19,11 +19,11 @@ class ClientRequestRepository extends BaseRepository implements ClientRequestRep
     private ShiftRepositoryInterface $shiftRepository;
     private LeaveRepositoryInterface $leaveRepository;
 
-    public function __construct(ClientRequest $clientRequest,
+    public function __construct(ClientRequest                 $clientRequest,
                                 PermissionRepositoryInterface $permissionRepository,
-                                UserRepositoryInterface $userRepository,
-                                ShiftRepositoryInterface $shiftRepository,
-                                LeaveRepositoryInterface $leaveRepository)
+                                UserRepositoryInterface       $userRepository,
+                                ShiftRepositoryInterface      $shiftRepository,
+                                LeaveRepositoryInterface      $leaveRepository)
     {
         $this->permissionRepository = $permissionRepository;
         $this->leaveRepository = $leaveRepository;
@@ -89,7 +89,8 @@ class ClientRequestRepository extends BaseRepository implements ClientRequestRep
             if ($filter) {
                 switch ($key) {
                     case "type":
-                        $query->where("type", $filters["type"]);
+                        if ($filters["type"] !== "revised")
+                            $query->where("type", $filters["type"]);
                         break;
                     case "date":
                         $query->whereBetween("created_at", $filters["date"]);

@@ -3,10 +3,13 @@
 namespace App\Notifications;
 
 use App\Models\Shift;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Morilog\Jalali\CalendarUtils;
+use Morilog\Jalali\Jalalian;
 use Ramsey\Uuid\Uuid;
 
 class ShiftPublished extends Notification implements ShouldQueue
@@ -31,7 +34,10 @@ class ShiftPublished extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        return ['mail', SMS::class];
+        return [
+            SMS::class,
+            'mail'
+        ];
     }
 
     /**
@@ -52,10 +58,12 @@ class ShiftPublished extends Notification implements ShouldQueue
     public function toSMS($notifiable)
     {
         return [
-            "mobile" => $notifiable->mobileNo,
-            "message" => " شیفت " . __("constants." . $this->shift->type) . " یرای بخش" . $this->shift->room->name . "
-    از دپارتمان" . $this->shift->room->department->name . "
-    برای تاریخ" . $this->shift->date . "از ساعت" . $this->shift->started_at . "تا ساعت" . $this->shift->ended_at
+            "receptor" => $notifiable->mobileNo,
+            "token" => $this->shift->room->name,
+            "token2" => CalendarUtils::convertNumbers(CalendarUtils::strftime('Y/m/d', strtotime($this->shift->date))),
+            "token3" => CalendarUtils::convertNumbers(Carbon::parse($this->shift->started_at)->format("H:i")),
+            "template" => "shift-register",
+            "token10" => $notifiable->name,
         ];
     }
 

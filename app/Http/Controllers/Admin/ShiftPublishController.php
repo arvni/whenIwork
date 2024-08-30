@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class ShiftPublishController extends Controller
 {
@@ -30,10 +31,11 @@ class ShiftPublishController extends Controller
      * @param Request $request
      * @return RedirectResponse
      * @throws AuthorizationException
+     * @throws ValidationException
      */
     public function __invoke(Shift $shift, Request $request)
     {
-        if ($shift->type==="normal") {
+        if ($shift->type === "normal") {
             $validator = Validator::make(["shift" => $shift], ["shift" => new CheckUserShiftPublish()]);
             $validator->validate();
         }
@@ -45,14 +47,9 @@ class ShiftPublishController extends Controller
 
     private function notifyUsers(Shift $shift)
     {
-        if ($shift->type == "open") {
-            $roles = $shift->Roles;
-            $users = collect();
-            foreach ($roles as $role) {
-                $users->push(User::role($role->name)->get());
-            }
-        } else
+        if ($shift->type != "open") {
             $users = $shift->users;
-        Notification::send($users, new ShiftPublished($shift));
+            Notification::send($users, new ShiftPublished($shift));
+        }
     }
 }

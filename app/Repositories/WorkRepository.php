@@ -105,5 +105,6 @@ class WorkRepository extends BaseRepository implements WorkRepositoryInterface
         $work->User()->associate($userId);
         $work->changed = true;
         $work->save();
+
     }
 }

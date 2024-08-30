@@ -38,9 +38,12 @@ class ConfirmClientRequestRule implements Rule, DataAwareRule
         $clientRequest = request()->route("clientRequest");
         $user = $clientRequest->User;
         $requestable = $clientRequest->Requestable;
-        if ($clientRequest->status !== "waiting")
+        if ($clientRequest->status !== "waiting") {
+            $this->msg=__("messages.haveDefinedBefore");
             return false;
+        }
         if ($clientRequest->type == "takeLeave") {
+
             if ($user->Leaves()->where(function ($q) use ($requestable) {
                 $q->whereDate("started_at", ">=", Carbon::parse($requestable->started_at)->toDate())->whereDate("started_at", "<=", Carbon::parse($requestable->ended_at)->toDate())->whereNot("id", $requestable->id);
             })->orWhere(function ($q) use ($requestable) {
@@ -61,9 +64,10 @@ class ConfirmClientRequestRule implements Rule, DataAwareRule
                     return false;
 
                 }
-                if ($user->leaves()->whereBetween("started_at", [Carbon::parse($requestable->started_at)->toDate(), Carbon::parse($requestable->ended_at)->toDate()])->whereNot("id", $requestable->id)->accepted()->count())
-                    $this->msg=__("messages.haveLeaveOnThisDateRange");
+                if ($user->leaves()->whereBetween("started_at", [Carbon::parse($requestable->started_at)->toDate(), Carbon::parse($requestable->ended_at)->toDate()])->whereNot("id", $requestable->id)->accepted()->count()) {
+                    $this->msg = __("messages.haveLeaveOnThisDateRange");
                     return false;
+                }
             }
         } else {
             if ($user->Leaves()->whereDate("started_at", "<=", $requestable->date)->whereDate("ended_at", ">=", $requestable->date)->count()) {

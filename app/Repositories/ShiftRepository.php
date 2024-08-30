@@ -9,7 +9,9 @@ use App\Models\ClientRequest;
 use App\Models\Shift;
 use App\Models\User;
 use App\Models\Work;
+use App\Notifications\ShiftUserChangeAccepted;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
 
 class ShiftRepository extends BaseRepository implements ShiftRepositoryInterface
@@ -138,6 +140,8 @@ class ShiftRepository extends BaseRepository implements ShiftRepositoryInterface
     public function changeUser(Shift $shift, ClientRequest $clientRequest)
     {
         $baseRequest = $shift->ClientRequests()->where("type", "changeUser")->where("revisable_by_id", $clientRequest->user_id)->first();
+        $baseRequest->load("User");
+        Notification::send($baseRequest->User,new ShiftUserChangeAccepted());
         $work = $shift->Works()->where("user_id", $baseRequest->user_id)->first();
         $this->workRepository->changeUser($work, $clientRequest->user_id);
     }

@@ -26,7 +26,7 @@ class Shift extends Model
     //additional Attribute
     public function getStartedAtDateTimeAttribute()
     {
-        return Carbon::parse("$this->date $this->started_at", config("app.timezone"));
+        return Carbon::parse(Carbon::parse($this->date)->format("Y-m-d") . " $this->started_at", config("app.timezone"));
     }
 
     //Scopes
