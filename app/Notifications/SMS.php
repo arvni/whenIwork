@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 use Kavenegar\KavenegarApi;
 
 class SMS

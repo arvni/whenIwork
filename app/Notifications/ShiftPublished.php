@@ -8,6 +8,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 use Morilog\Jalali\CalendarUtils;
 use Morilog\Jalali\Jalalian;
 use Ramsey\Uuid\Uuid;
@@ -57,11 +58,12 @@ class ShiftPublished extends Notification implements ShouldQueue
 
     public function toSMS($notifiable)
     {
+        $this->shift->loadMissing(["Room:name,id"]);
         return [
             "receptor" => $notifiable->mobileNo,
-            "token" => $this->shift->room->name,
-            "token2" => CalendarUtils::convertNumbers(CalendarUtils::strftime('Y/m/d', strtotime($this->shift->date))),
-            "token3" => CalendarUtils::convertNumbers(Carbon::parse($this->shift->started_at)->format("H:i")),
+            "token20" => $this->shift->room->name,
+            "token" => CalendarUtils::convertNumbers(CalendarUtils::strftime('Y/m/d', strtotime($this->shift->date))),
+            "token2" => CalendarUtils::convertNumbers(Carbon::parse($this->shift->started_at)->format("H:i")),
             "template" => "shift-register",
             "token10" => $notifiable->name,
         ];
