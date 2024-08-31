@@ -7,8 +7,6 @@ use App\Http\Requests\ShiftStoreRequest;
 use App\Http\Requests\ShiftUpdateRequest;
 use App\Interfaces\ShiftRepositoryInterface;
 use App\Models\Shift;
-use App\Notifications\ShiftPublished;
-use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 
 class ShiftController extends Controller
@@ -22,12 +20,7 @@ class ShiftController extends Controller
 
     public function store(ShiftStoreRequest $request)
     {
-        $shift = $this->shiftRepository->create($request->all());
-        if ($shift->type != "open") {
-            $shift->load("Users");
-            $users = $shift->users;
-            Notification::send($users, new ShiftPublished($shift));
-        }
+        $this->shiftRepository->create($request->all());
         return $this->responseWithSuccess(__("messages.successCreated", ["title" => "شیفت"]));
     }
 
