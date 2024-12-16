@@ -36,8 +36,8 @@ class ShiftPublished extends Notification implements ShouldQueue
     public function via($notifiable)
     {
         return [
-            SMS::class,
-            'mail'
+//            SMS::class,
+//            'mail'
         ];
     }
 
